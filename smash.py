@@ -1,6 +1,7 @@
 #!/usr/bin/env
 
 import datetime
+from stage import Stage
 
 # TODO: Write a script that makes it easier to enter all this info.
 # 1) A couple of the keys should always be 0 for FG--have the script error
@@ -40,5 +41,39 @@ player1={"name": "Mr. Wheat", "character": "Duck Hunt", "winner": True,
 
 player2={"TODO": "Fill this in later"}
 
-match={"time": datetime.datetime(2014, 11, 21), "duration": 186,
+match={"date": datetime.datetime(2014, 11, 21), "duration": 186,
        "stage": "Gaur Plains", "player1": player1, "player2": player2}
+
+def enter_match(defaults=True, omega=True):
+    # TODO: Need type checking for all of this
+    print("Enter match information:")
+    date = input("Date: ")
+    duration = input("Duration (s): ")
+    stage = input("Stage: ")
+    if not defaults == True:
+        omega = input(" (Omega?) ")
+    print("First, how did you do?")
+
+    # TODO: Make this a separate function
+    print("PLAYER 1 (You):")
+    smasher1_name = "Lt Wheat"
+    if not defaults == True:
+        smasher1_name = input("Name: ")
+    fighter1_name = input("Character: ")
+    winner1 = input("Did they win?")
+    #stats1 = input("stats: ")
+
+    print("PLAYER 2 (Opponent):")
+    smasher2_name = input("Name: ")
+    fighter2_name = input("Character: ")
+    winner2 = input("Did they win?")
+    #stats2 = input("stats: ")
+    #info = prompt(all_match_info_player1)
+    #stage_name = prompt("Stage?   ")
+
+    #stage = Stage(name=stage_name, omega=omega)
+    #construct match
+    #mongodao.store(match)
+
+if __name__ == "__main__":
+    enter_match()

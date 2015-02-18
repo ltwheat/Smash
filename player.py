@@ -5,7 +5,7 @@ import traceback
 # The Player object represents the actual performance of one Smasher
 # in a given match. Thus, a player has ("is", at its core) a Smasher,
 # represented in the Match by a Fighter, a boolean to determine whether
-# it was victorious, and a list of stats for that match.
+# it was victorious, and a dict of stats for that match.
 class Player(object):
     def __init__(self, smasher, fighter, winner, stats):
         # winner being something other than a boolean can cause trouble down the road

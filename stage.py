@@ -23,7 +23,7 @@ class Stage(object):
     # Adds the Omega to the name, if appropriate
     def get_name(self):
         if self.omega:
-            return "{0} (Omega)".format(self.name))
+            return "{0} (Omega)".format(self.name)
         return self.name
 
     # Return name associated with stage id
