@@ -16,13 +16,15 @@ class Stage(object):
             if stage_id != -1:
                 raise ValueError("No stage with id: {0}".format(stage_id))            
             stage_id = self.get_stage_id_for_name(name)
-        # TODO: Omega should be part of the display name, but not the actual
-        #       attribute. Come back to this when it's needed (different method?)
-        #if omega == True:
-        #    name += " (Omega)"
         self.name = name
         self.id = stage_id
         self.omega = omega
+
+    # Adds the Omega to the name, if appropriate
+    def get_name(self):
+        if self.omega:
+            return "{0} (Omega)".format(self.name))
+        return self.name
 
     # Return name associated with stage id
     def get_stage_name_for_id(self, stage_id):
