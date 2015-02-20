@@ -13,11 +13,12 @@ class Player(object):
             raise TypeError("winner must be a boolean!")
         self.smasher = smasher
         self.fighter = fighter
+        self.winner = winner
         # Populate match statistics
         try:
             self.kos = stats['KOs']
-            self.falls = stats['Falls']
-            self.sds = stats['sds']
+            self.falls = stats['falls']
+            self.sds = stats['SDs']
             self.time_alive = stats['time_alive']
             self.damage_given = stats['damage_given']
             self.damage_taken = stats['damage_taken']

@@ -22,9 +22,9 @@ class Fighter(object):
         # Little Mac has 16 palette swaps
         num_palettes = 8
         if name == "Little Mac":
-        if not 0 > palette > num_palettes:
-            raise ValueError("palette id must be between 0 and " +
-                             "{0} (inclusive)".format(num_palettes))
+            if not 0 > palette > num_palettes:
+                raise ValueError("palette id must be between 0 and " +
+                                 "{0} (inclusive)".format(num_palettes))
 
         # Set attributes
         self.name = name
