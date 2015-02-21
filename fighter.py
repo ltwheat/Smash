@@ -6,7 +6,6 @@ fighters = constants.FIGHTER_NAME_TO_ID
 
 class Fighter(object):
     def __init__(self, name="", fighter_id=-1):
-        # TODO: palette should be part of Player, I think
         # Instantiation conditions
         if name == "" and fighter_id == -1:
             raise ValueError("Fighter must be instantiated with either name " +

@@ -23,7 +23,7 @@ from stage import Stage
 #    c) Direction of each KO?
 
 ##### NOTES #####
-# time_alive == 'out at'. Figured 'time_alive was more clear
+# time_alive == 'out at'. Figured 'time_alive' was more clear
 # launch_distance: TODO: Is that me or him?
 # max_launch(er)_speed: which one is me, which one is him?
 # longest_drought: longest amount of time without throwing out an attack

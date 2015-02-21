@@ -8,11 +8,13 @@ import traceback
 # by 'palette'), a boolean to determine whether it was victorious, and a dict
 # of stats for that match.
 class Player(object):
-    def __init__(self, smasher, fighter, winner, stats, palette=0):
+    def __init__(self, smasher, fighter, winner, kos, stats, palette=0):
         # winner being something other than a boolean can cause trouble down
         # the road
         if type(winner) != bool:
             raise TypeError("winner must be a boolean!")
+        if type(kos) != list:
+            raise TypeError("kos must be a list")
         # TODO: Type-check these guys?
         self.smasher = smasher
         self.fighter = fighter
@@ -33,7 +35,6 @@ class Player(object):
         #       should be in some config or something instead of hard-coded
         #       here
         try:
-            self.stats['KOs'] = stats['KOs']
             self.stats['falls'] = stats['falls']
             self.stats['SDs'] = stats['SDs']
             self.stats['time_alive'] = stats['time_alive']
@@ -66,5 +67,5 @@ class Player(object):
     def convert_to_dict():
         player = {"smasher":self.smasher.convert_to_dict(),
                   "fighter":self.fighter.convert_to_dict(),
-                  "palette":self.palette, "winner":self.winner,
+                  "palette":self.palette, "kos":self."winner":self.winner,
                   "stats":self.stats}
