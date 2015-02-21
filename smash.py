@@ -27,15 +27,15 @@ from stage import Stage
 # transformation_time: total time spent in alternate state. Should always
 #                      be zero in FG
 
-# TODO: convert b/w objects and docs
+# TODO: convert from doc to object
 dt = datetime.datetime.now()
 dur = 60
 lylat = Stage(name="Lylat Cruise")
 smasher_lt = Smasher(name="Lt Wheat")
 luigi = Fighter(name="Luigi")
 mario = Fighter(name="Mario")
-kos1 = [KO("uspecial",101,"up"), KO("fsmash",120,"right")]
-kos2 = [KO("dsmash",143,"left")]
+kos1 = [KO("uspecial",101,"up",54), KO("fsmash",120,"right",146)]
+kos2 = [KO("dsmash",143,"left",123)]
 stats_lt={"falls": 1, "SDs": 0, "time_alive": -1, "damage_given": 286,
          "damage_taken": 190, "damage_recovered": 0, "peak_damage": 105,
          "launch_distance": 302, "ground_time": 115, "air_time": 71,
@@ -80,6 +80,10 @@ def store_match(match):
         #       that probably won't scale? Should we keep a separate coll of
         #       just match ids?
         match_id = coll.find().count()
+        # TODO: If store_match is gonna be a shared method, then the match_id
+        #       needs to be assigned in a different method (that also has
+        #       mongo access?
+        match['match_id'] = match_id
         for db_match in list(coll.find()):
             if match_id == db_match['match_id']:
                 err_msg = "Match with id {0} already found in " \
@@ -94,7 +98,39 @@ def store_match(match):
         
 def enter_match(defaults=True, omega=True):
     # TODO: Need type checking for all of this
+    # TODO: Escape accidentally hitting enter, except where blanks are
+    #       significant. That shit is annoying
     print("Enter match information:")
+
+    # TODO: Putting KO entry at the beginning doesn't really help unless we
+    #       record them as a come, rather than one player at a time.
+    kos1 = []
+    print("Assuming you're watching the replay, tell me about the KOs first")
+    num_kos1 = int(input("How many KOs did you get? "))
+    if num_kos1 != 0:
+        print("Tell me about those.")
+    for num in range(num_kos1):
+        print("KO {0}:".format(num + 1))
+        ko_move = input("Move? ")
+        ko_dmg = int(input("% Damage? "))
+        ko_side = input("Off of which side of the screen? ")
+        ko_time = int(input("How long into the match (s)? "))
+        ko = KO(ko_move, ko_dmg, ko_side, ko_time)
+        kos1.append(ko)
+
+    kos2 = []
+    num_kos2 = int(input("How many KOs did they get? "))
+    if num_kos2 != 0:
+        print("Tell me about those.")
+    for num in range(num_kos2):
+        print("KO {0}:".format(num + 1))
+        ko_move = input("Move? ")
+        ko_dmg = int(input("% Damage? "))
+        ko_side = input("Off of which side of the screen? ")
+        ko_time = int(input("How long into the match (s)? "))
+        ko = KO(ko_move, ko_dmg, ko_side, ko_time)
+        kos2.append(ko)
+                      
     # TODO: Parse all kinds of datetime strings, or come up with another way
     #       to enter them (optional arg?), eg Feb 2, February 2nd, 2/2
     date = input("Date: ")
@@ -121,24 +157,20 @@ def enter_match(defaults=True, omega=True):
     winner1 = bool(input("Did they win (empty string for no)"))
     stats1 = {}
 
-    kos1 = []
-    num_kos1 = int(input("How many KOs did you get? "))
-    print("Tell me about those.")
-    for num in range(num_kos1):
-        print("KO {0}:".format(num + 1))
-        ko_move = input("Move? ")
-        ko_dmg = int(input("% Damage? "))
-        ko_side = input("Off of which side of the screen? ")
-        ko = KO(ko_move, ko_dmg, ko_side)
-        kos1.append(ko)
-
     print("Other stats:")
     stats1['falls'] = int(input("Falls: "))
     stats1['SDs'] = int(input("SDs (Remember this is special): "))
-    stats1['time_alive'] = int(input("Time Alive: "))
+    # TODO: FOR GLORY: time_alive doesn't need to be entered--if it's for the
+    #       winner, it's n/a or -1, and for the loser, it's the same as
+    #       duration
+    stats1['time_alive'] = -1
+    if not winner1:
+        stats1['time_alive'] = int(input("Time Alive: "))
+    # TODO: FOR GLORY: damage_given and damage_taken are inverses for opponents
     stats1['damage_given'] = int(input("Damage Given: "))
     stats1['damage_taken'] = int(input("Damage Taken: "))
     stats1['damage_recovered'] = int(input("Damage Recovered: "))
+    # TODO: peak_damage can be calculated from all KOs
     stats1['peak_damage'] = int(input("Peak Damage: "))
     stats1['launch_distance'] = int(input("Launch Distance: "))
     stats1['ground_time'] = int(input("Ground Time: "))
@@ -148,10 +180,12 @@ def enter_match(defaults=True, omega=True):
     stats1['air_attacks'] = int(input("Air Attacks: "))
     stats1['smash_attacks'] = int(input("Smash Attacks: "))
     stats1['grabs'] = int(input("Grabs: "))
+    # TODO: throws must be 0 if grabs is 0
     stats1['throws'] = int(input("Throws: "))
     stats1['edge_grabs'] = int(input("Edge Grabs: "))
     stats1['projectiles'] = int(input("Projectiles: "))
     stats1['items_grabbed'] = int(input("Items Grabbed: "))
+    # TODO: FOR GLORY: max_launch(er)_speed are inverses for opponents
     stats1['max_launch_speed'] = int(input("Max Launch Speed: "))
     stats1['max_launcher_speed'] = int(input("Max Launcher Speed: "))
     stats1['longest_drought'] = int(input("Longest Drought: "))
@@ -166,6 +200,8 @@ def enter_match(defaults=True, omega=True):
                      player1_palette)
     # TODO: Make this a separate function
     print("PLAYER 2 (Opponent):")
+    # TODO: This needs to allow for other names, figure out a solution for
+    #       that first
     smasher2_name = input("Name: ")
     smasher2 = Smasher(name=smasher1_name)
     
@@ -173,22 +209,13 @@ def enter_match(defaults=True, omega=True):
     fighter2 = Fighter(name=fighter2_name)
     
     winner2 = not winner1
-
-    kos2 = []
-    num_kos2 = int(input("How many KOs did they get? "))
-    print("Tell me about those.")
-    for num in range(num_kos2):
-        print("KO {0}:".format(num + 1))
-        ko_move = input("Move? ")
-        ko_dmg = int(input("% Damage? "))
-        ko_side = input("Off of which side of the screen? ")
-        ko = KO(ko_move, ko_dmg, ko_side)
-        kos2.append(ko)
     
     stats2 = {}
     stats2['falls'] = int(input("Falls: "))
     stats2['SDs'] = int(input("SDs (Remember this is special): "))
-    stats2['time_alive'] = int(input("Time Alive: "))
+    stats2['time_alive'] = -1
+    if not winner2:
+        stats2['time_alive'] = int(input("Time Alive: "))
     stats2['damage_given'] = int(input("Damage Given: "))
     stats2['damage_taken'] = int(input("Damage Taken: "))
     stats2['damage_recovered'] = int(input("Damage Recovered: "))
