@@ -17,7 +17,7 @@ class Smasher(object):
                 raise ValueError("No smasher with id: {0}".format(smasher_id))            
             smasher_id = self.get_smasher_id_for_name(name)
         self.name = name
-        self.id = smasher_id
+        self.smasher_id = smasher_id
 
     # Return name associated with smasher id
     def get_smasher_name_for_id(self, smasher_id):
@@ -30,6 +30,6 @@ class Smasher(object):
         return smashers[name]
 
     # Nicer than Smasher.__dict__
-    def convert_to_dict():
+    def convert_to_dict(self):
         smasher = {"name":self.name, "smasher_id":self.smasher_id}
         return smasher

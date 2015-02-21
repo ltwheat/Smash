@@ -19,13 +19,15 @@ class Player(object):
         self.smasher = smasher
         self.fighter = fighter
         self.winner = winner
+        self.kos = kos
 
         max_palette_id = 7
         # Little Mac has 16 palette swaps
         if self.fighter.name == "Little Mac":
             max_palette_id = 15
-        if not 0 > palette > max_palette_id:
-            raise ValueError("palette id must be between 0 and " +
+        if 0 > palette > max_palette_id:
+            raise ValueError("Invalid palette id {0}: ".format(palette) +
+                             "palette id must be between 0 and " +
                              "{0} (inclusive)".format(max_palette_id))
         self.palette = palette
 
@@ -64,8 +66,14 @@ class Player(object):
             print(traceback.print_exc())
 
     # Nicer than Player.__dict__
-    def convert_to_dict():
+    def convert_to_dict(self):
+        # Convert KOs first
+        kos = []
+        for ko in self.kos:
+            kos.append(ko.convert_to_dict())
+
         player = {"smasher":self.smasher.convert_to_dict(),
                   "fighter":self.fighter.convert_to_dict(),
-                  "palette":self.palette, "kos":self."winner":self.winner,
+                  "palette":self.palette, "kos":kos, "winner":self.winner,
                   "stats":self.stats}
+        return player

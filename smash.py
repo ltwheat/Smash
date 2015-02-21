@@ -4,6 +4,7 @@ import datetime
 import pymongo
 
 from fighter import Fighter
+from ko import KO
 from match import Match
 from player import Player
 from smasher import Smasher
@@ -16,11 +17,7 @@ from stage import Stage
 #    but do we need an external one? Should have one for players, at least.
 #    a) No way to differentiate other players aside from name, though...is this
 #       different in WiiU version?
-# 3) Extra info not in match that's useful:
-#    a) % at when killed for each stock
-#    b) SDs should be recorded less leniently than in game. If I've been hit
-#       recently but botch the recovery, that should be an SD
-#    c) Direction of each KO?
+
 
 ##### NOTES #####
 # time_alive == 'out at'. Figured 'time_alive' was more clear
@@ -33,12 +30,13 @@ from stage import Stage
 # TODO: convert b/w objects and docs
 dt = datetime.datetime.now()
 dur = 60
-#lylat = Stage(name="Lylat Cruise")
-lylat = {"name":"Lylat Cruise"}
-smasher_lt = {"name":"Lt Wheat"}
-luigi = {"name":"Luigi"}
-mario = {"name":"Mario"}
-stats_lt={ "KOs": 2, "falls": 1, "SDs": 0, "time_alive": -1, "damage_given": 286,
+lylat = Stage(name="Lylat Cruise")
+smasher_lt = Smasher(name="Lt Wheat")
+luigi = Fighter(name="Luigi")
+mario = Fighter(name="Mario")
+kos1 = [KO("uspecial",101,"up"), KO("fsmash",120,"right")]
+kos2 = [KO("dsmash",143,"left")]
+stats_lt={"falls": 1, "SDs": 0, "time_alive": -1, "damage_given": 286,
          "damage_taken": 190, "damage_recovered": 0, "peak_damage": 105,
          "launch_distance": 302, "ground_time": 115, "air_time": 71,
          "hit_percentage": 44, "ground_attacks": 59, "air_attacks": 20,
@@ -47,11 +45,11 @@ stats_lt={ "KOs": 2, "falls": 1, "SDs": 0, "time_alive": -1, "damage_given": 286
          "max_launcher_speed": 145, "longest_drought": 9,
          "transformation_time": 0, "final_smashes": 0}
 
-player1 = {"smasher":smasher_lt, "fighter":luigi, "winner":True, "stats":stats_lt}
-player2 = {"smasher":smasher_lt, "fighter":mario, "winner":False, "stats":stats_lt}
+player1 = Player(smasher_lt, luigi, True, kos1, stats_lt)
+player2 = Player(smasher_lt, mario, False, kos2, stats_lt)
 
 
-match={"date": datetime.datetime(2014, 11, 21), "duration": 186,
+match_test={"date": datetime.datetime(2014, 11, 21), "duration": 186,
        "stage": "Gaur Plains", "player1": player1, "player2": player2}
 
 #smash_db_name = "smash_wii_u"
@@ -89,7 +87,6 @@ def store_match(match):
                 raise pymongo.errors.DuplicateKeyError(err_msg)
         db_match_id = coll.insert(match)
         print("Stored match of id {0}:".format(match_id))
-        #print(match.get_synopsis())
     except pymongo.errors.ConnectionFailure:
         print("Could not connect to database")
     except pymongo.errors.DuplicateKeyError as dke:
@@ -99,7 +96,7 @@ def enter_match(defaults=True, omega=True):
     # TODO: Need type checking for all of this
     print("Enter match information:")
     # TODO: Parse all kinds of datetime strings, or come up with another way
-    #       to enter them (optional arg?)
+    #       to enter them (optional arg?), eg Feb 2, February 2nd, 2/2
     date = input("Date: ")
     date_time = datetime.datetime(2015, 2, 19, 21, 30)
     duration = int(input("Duration (s): "))
@@ -119,17 +116,25 @@ def enter_match(defaults=True, omega=True):
     smasher1 = Smasher(name=smasher1_name)
     
     fighter1_name = input("Character: ")
-    fighter1_palette = 0
-    if not defaults == True:
-        fighter1_palette = int(input("Palette #: "))
-    fighter1 = Fighter(name=fighter1_name, palette=fighter1_palette)
+    fighter1 = Fighter(name=fighter1_name)
     
     winner1 = bool(input("Did they win (empty string for no)"))
     stats1 = {}
 
-    stats1['KOs'] = int(input("KOs: "))
+    kos1 = []
+    num_kos1 = int(input("How many KOs did you get? "))
+    print("Tell me about those.")
+    for num in range(num_kos1):
+        print("KO {0}:".format(num + 1))
+        ko_move = input("Move? ")
+        ko_dmg = int(input("% Damage? "))
+        ko_side = input("Off of which side of the screen? ")
+        ko = KO(ko_move, ko_dmg, ko_side)
+        kos1.append(ko)
+
+    print("Other stats:")
     stats1['falls'] = int(input("Falls: "))
-    stats1['SDs'] = int(input("SDs: "))
+    stats1['SDs'] = int(input("SDs (Remember this is special): "))
     stats1['time_alive'] = int(input("Time Alive: "))
     stats1['damage_given'] = int(input("Damage Given: "))
     stats1['damage_taken'] = int(input("Damage Taken: "))
@@ -152,25 +157,37 @@ def enter_match(defaults=True, omega=True):
     stats1['longest_drought'] = int(input("Longest Drought: "))
     stats1['transformation_time'] = int(input("Transformation Time: "))
     stats1['final_smashes'] = int(input("Final Smashes: "))
+    
+    player1_palette = 0
+    if not defaults == True:
+        player1_palette = int(input("Palette #: "))
 
-    player1 = Player(smasher1, fighter1, winner1, stats1)
+    player1 = Player(smasher1, fighter1, winner1, kos1, stats1,
+                     player1_palette)
     # TODO: Make this a separate function
     print("PLAYER 2 (Opponent):")
     smasher2_name = input("Name: ")
     smasher2 = Smasher(name=smasher1_name)
     
     fighter2_name = input("Character: ")
-    fighter2_palette = 0
-    if not defaults == True:
-        fighter2_palette = int(input("Palette #: "))
-    fighter2 = Fighter(name=fighter2_name, palette=fighter2_palette)
+    fighter2 = Fighter(name=fighter2_name)
     
     winner2 = not winner1
+
+    kos2 = []
+    num_kos2 = int(input("How many KOs did they get? "))
+    print("Tell me about those.")
+    for num in range(num_kos2):
+        print("KO {0}:".format(num + 1))
+        ko_move = input("Move? ")
+        ko_dmg = int(input("% Damage? "))
+        ko_side = input("Off of which side of the screen? ")
+        ko = KO(ko_move, ko_dmg, ko_side)
+        kos2.append(ko)
     
     stats2 = {}
-    stats2['KOs'] = int(input("KOs: "))
     stats2['falls'] = int(input("Falls: "))
-    stats2['SDs'] = int(input("SDs: "))
+    stats2['SDs'] = int(input("SDs (Remember this is special): "))
     stats2['time_alive'] = int(input("Time Alive: "))
     stats2['damage_given'] = int(input("Damage Given: "))
     stats2['damage_taken'] = int(input("Damage Taken: "))
@@ -193,16 +210,23 @@ def enter_match(defaults=True, omega=True):
     stats2['longest_drought'] = int(input("Longest Drought: "))
     stats2['transformation_time'] = int(input("Transformation Time: "))
     stats2['final_smashes'] = int(input("Final Smashes: "))
+    
+    player2_palette = 0
+    if not defaults == True:
+        player2_palette = int(input("Palette #: "))
 
-    player2 = Player(smasher2, fighter2, winner2, stats2)
+    player2 = Player(smasher2, fighter2, winner2, kos2, stats2,
+                     player2_palette)
 
 
     match = Match(date_time, duration, stage, player1, player2)
-    store_match(match.__dict__)
+    store_match(match.convert_to_dict())
+    print(match.get_synopsis())
 
 def enter_test_match():
     match = Match(dt, dur, lylat, player1, player2)
-    store_match(match.__dict__)
+    store_match(match.convert_to_dict())
+    print(match.get_synopsis())
 
 if __name__ == "__main__":
-    enter_test_match()
+    enter_match()

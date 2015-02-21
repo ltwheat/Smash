@@ -17,7 +17,7 @@ class Stage(object):
                 raise ValueError("No stage with id: {0}".format(stage_id))            
             stage_id = self.get_stage_id_for_name(name)
         self.name = name
-        self.id = stage_id
+        self.stage_id = stage_id
         self.omega = omega
 
     # Adds the Omega to the name, if appropriate
@@ -37,7 +37,7 @@ class Stage(object):
         return stages[name]
 
     # Nicer than Stage.__dict__
-    def convert_to_dict():
+    def convert_to_dict(self):
         stage = {"name":self.name, "stage_id":self.stage_id,
                  "omega":self.omega}
         return stage

@@ -1,6 +1,9 @@
 #!/usr/bin/env
 
 # TODO: Move to a config of some sort
+# TODO: Add variants and a standardizer, so for instance, accept 'downb' as
+#       well as 'dspecial', but still store as 'dspecial'. Same thing with
+#       direction, e.g. 'top' -> 'up'
 moves = ["jab", "ftilt", "dash", "fsmash", "dtilt", "dsmash", "utilt",
          "usmash", 'nspecial', 'sspecial', 'dspecial', 'uspecial', 'fthrow',
          'bthrow', 'dthrow', 'uthrow', 'nair', 'fair', 'bair', 'dair', 'uair']
@@ -30,7 +33,7 @@ class KO(object):
         self.direction = direction
 
     # Nicer than KO.__dict__
-    def convert_to_dict:
+    def convert_to_dict(self):
         ko = {"move":self.move, "damage":self.damage,
               "direction":self.direction}
-        return KO
+        return ko

@@ -15,7 +15,8 @@ class Match(object):
         self.match_id = match_id
 
     # Return brief synopsis of match
-    def get_synopsis():
+    # TODO: Make this prettier
+    def get_synopsis(self):
         winner = self.get_winner()
         winner_name = winner.smasher.name
         winner_fighter = winner.fighter.name
@@ -33,21 +34,21 @@ class Match(object):
         return synopsis
 
     # Return winner
-    def get_winner():
+    def get_winner(self):
         if self.player1.winner:
             return self.player1
         return self.player2
 
     # Return loser
-    def get_loser():
+    def get_loser(self):
         if self.player1.winner:
             return self.player2
         return self.player1
 
     # Nicer than match.__dict__
-    def convert_to_dict():
+    def convert_to_dict(self):
         match = {"date":self.date, "duration":self.duration,
-                 "stage":self.stage.convert_to_dict,
+                 "stage":self.stage.convert_to_dict(),
                  "player1":self.player1.convert_to_dict(),
                  "player2":self.player2.convert_to_dict(),
                  "match_id":self.match_id}

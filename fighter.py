@@ -21,7 +21,7 @@ class Fighter(object):
 
         # Set attributes
         self.name = name
-        self.id = fighter_id
+        self.fighter_id = fighter_id
 
     # Return name associated with fighter id
     def get_fighter_name_for_id(self, fighter_id):
@@ -34,6 +34,6 @@ class Fighter(object):
         return fighters[name]
 
     # Nicer than Figher.__dict__
-    def convert_to_dict():
+    def convert_to_dict(self):
         fighter = {"name":self.name, "fighter_id":self.fighter_id}
         return fighter
