@@ -6,6 +6,7 @@ fighters = constants.FIGHTER_NAME_TO_ID
 
 class Fighter(object):
     def __init__(self, name="", fighter_id=-1, palette=0):
+        # TODO: palette should be part of Player, I think
         # Instantiation conditions
         if name == "" and fighter_id == -1:
             raise ValueError("Fighter must be instantiated with either name " +
@@ -40,3 +41,8 @@ class Fighter(object):
     # Return id associated with fighter name
     def get_fighter_id_for_name(self, name):
         return fighters[name]
+
+    # Nicer than Figher.__dict__
+    def convert_to_dict():
+        fighter = {"name":self.name, "fighter_id":self.fighter_id}
+        return fighter

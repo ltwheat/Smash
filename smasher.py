@@ -28,3 +28,8 @@ class Smasher(object):
     # Return id associated with smasher name
     def get_smasher_id_for_name(self, name):
         return smashers[name]
+
+    # Nicer than Smasher.__dict__
+    def convert_to_dict():
+        smasher = {"name":self.name, "smasher_id":self.smasher_id}
+        return smasher

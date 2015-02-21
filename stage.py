@@ -35,3 +35,9 @@ class Stage(object):
     # Return id associated with stage name
     def get_stage_id_for_name(self, name):
         return stages[name]
+
+    # Nicer than Stage.__dict__
+    def convert_to_dict():
+        stage = {"name":self.name, "stage_id":self.stage_id,
+                 "omega":self.omega}
+        return stage

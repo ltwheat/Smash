@@ -14,33 +14,44 @@ class Player(object):
         self.smasher = smasher
         self.fighter = fighter
         self.winner = winner
+
         # Populate match statistics
+        self.stats = {}
+        # TODO: This segment should be a lot simpler, and the required stats
+        #       should be in some config or something instead of hard-coded
+        #       here
         try:
-            self.kos = stats['KOs']
-            self.falls = stats['falls']
-            self.sds = stats['SDs']
-            self.time_alive = stats['time_alive']
-            self.damage_given = stats['damage_given']
-            self.damage_taken = stats['damage_taken']
-            self.damage_recovered = stats['damage_recovered']
-            self.peak_damage = stats['peak_damage']
-            self.launch_distance = stats['launch_distance']
-            self.ground_time = stats['ground_time']
-            self.air_time = stats['air_time']
-            self.hit_percentage = stats['hit_percentage']
-            self.ground_attacks = stats['ground_attacks']
-            self.air_attacks = stats['air_attacks']
-            self.smash_attacks = stats['smash_attacks']
-            self.grabs = stats['grabs']
-            self.throws = stats['throws']
-            self.edge_grabs = stats['edge_grabs']
-            self.projectiles = stats['projectiles']
-            self.items_grabbed = stats['items_grabbed']
-            self.max_launch_speed = stats['max_launch_speed']
-            self.max_launcher_speed = stats['max_launcher_speed']
-            self.longest_drought = stats['longest_drought']
-            self.transformation_time = stats['transformation_time']
-            self.final_smashes = stats['final_smashes']
+            self.stats['KOs'] = stats['KOs']
+            self.stats['falls'] = stats['falls']
+            self.stats['SDs'] = stats['SDs']
+            self.stats['time_alive'] = stats['time_alive']
+            self.stats['damage_given'] = stats['damage_given']
+            self.stats['damage_taken'] = stats['damage_taken']
+            self.stats['damage_recovered'] = stats['damage_recovered']
+            self.stats['peak_damage'] = stats['peak_damage']
+            self.stats['launch_distance'] = stats['launch_distance']
+            self.stats['ground_time'] = stats['ground_time']
+            self.stats['air_time'] = stats['air_time']
+            self.stats['hit_percentage'] = stats['hit_percentage']
+            self.stats['ground_attacks'] = stats['ground_attacks']
+            self.stats['air_attacks'] = stats['air_attacks']
+            self.stats['smash_attacks'] = stats['smash_attacks']
+            self.stats['grabs'] = stats['grabs']
+            self.stats['throws'] = stats['throws']
+            self.stats['edge_grabs'] = stats['edge_grabs']
+            self.stats['projectiles'] = stats['projectiles']
+            self.stats['items_grabbed'] = stats['items_grabbed']
+            self.stats['max_launch_speed'] = stats['max_launch_speed']
+            self.stats['max_launcher_speed'] = stats['max_launcher_speed']
+            self.stats['longest_drought'] = stats['longest_drought']
+            self.stats['transformation_time'] = stats['transformation_time']
+            self.stats['final_smashes'] = stats['final_smashes']
         except KeyError:
             print("Expected an item not contained in stats:")
             print(traceback.print_exc())
+
+    # Nicer than Player.__dict__
+    def convert_to_dict():
+        player = {"smasher":self.smasher.convert_to_dict(),
+                  "fighter":self.fighter.convert_to_dict(),
+                  "winner":self.winner, "stats":self.stats}
