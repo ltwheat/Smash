@@ -4,16 +4,28 @@ import traceback
 
 # The Player object represents the actual performance of one Smasher
 # in a given match. Thus, a player has ("is", at its core) a Smasher,
-# represented in the Match by a Fighter, a boolean to determine whether
-# it was victorious, and a dict of stats for that match.
+# represented in the Match by a Fighter (using the palette swap determined
+# by 'palette'), a boolean to determine whether it was victorious, and a dict
+# of stats for that match.
 class Player(object):
-    def __init__(self, smasher, fighter, winner, stats):
-        # winner being something other than a boolean can cause trouble down the road
+    def __init__(self, smasher, fighter, winner, stats, palette=0):
+        # winner being something other than a boolean can cause trouble down
+        # the road
         if type(winner) != bool:
             raise TypeError("winner must be a boolean!")
+        # TODO: Type-check these guys?
         self.smasher = smasher
         self.fighter = fighter
         self.winner = winner
+
+        max_palette_id = 7
+        # Little Mac has 16 palette swaps
+        if self.fighter.name == "Little Mac":
+            max_palette_id = 15
+        if not 0 > palette > max_palette_id:
+            raise ValueError("palette id must be between 0 and " +
+                             "{0} (inclusive)".format(max_palette_id))
+        self.palette = palette
 
         # Populate match statistics
         self.stats = {}
@@ -54,4 +66,5 @@ class Player(object):
     def convert_to_dict():
         player = {"smasher":self.smasher.convert_to_dict(),
                   "fighter":self.fighter.convert_to_dict(),
-                  "winner":self.winner, "stats":self.stats}
+                  "palette":self.palette, "winner":self.winner,
+                  "stats":self.stats}
