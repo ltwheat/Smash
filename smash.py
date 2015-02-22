@@ -2,6 +2,7 @@
 
 import datetime
 import pymongo
+import traceback
 
 from fighter import Fighter
 from ko import KO
@@ -95,6 +96,78 @@ def store_match(match):
         print("Could not connect to database")
     except pymongo.errors.DuplicateKeyError as dke:
         print(dke)
+
+def dict_to_fighter(fighter_dict):
+    try:
+        name = fighter_dict['name']
+        fighter_id = fighter_dict['fighter_id']
+        fighter = Fighter(name, fighter_id)
+    except Exception:
+        print("Unknown error lol")
+    return fighter
+
+def dict_to_ko(ko_dict):
+    try:
+        move = ko_dict['move']
+        damage = ko_dict['damage']
+        direction = ko_dict['direction']
+        time = ko_dict['time']        
+        ko = KO(move, damage, direction, time)
+    except Exception:
+        print("Unknown error lol")
+        traceback.print_exc()
+    return ko
+
+def dict_to_match(match_dict):
+    try:
+        date = match_dict['date']
+        duration = match_dict['duration']
+        stage = dict_to_stage(match_dict['stage'])
+        player1 = dict_to_player(match_dict['player1'])
+        player2 = dict_to_player(match_dict['player2'])
+        time_limit = match_dict['time_limit']
+        match = Match(date, duration, stage, player1, player2, time_limit)
+    except Exception:
+        print("Unknown error lol")
+        traceback.print_exc()
+    return match
+
+def dict_to_player(player_dict):
+    try:
+        # Convert list of KOs
+        kos = []
+        for ko in player_dict['kos']:
+            kos.append(dict_to_ko(ko))
+
+        smasher = dict_to_smasher(player_dict['smasher'])
+        fighter = dict_to_fighter(player_dict['fighter'])
+        palette = player_dict['palette']
+        winner = player_dict['winner']
+        stats = player_dict['stats']
+        player = Player(smasher, fighter, winner, kos, stats, palette)
+    except Exception:
+        print("Unknown error lol")
+        traceback.print_exc()
+    return player
+
+def dict_to_smasher(smasher_dict):
+    try:
+        name = smasher_dict['name']
+        smasher_id = smasher_dict['smasher_id']
+        smasher = Smasher(name, smasher_id)
+    except Exception:
+        print("Unknown error lol")
+    return smasher
+
+def dict_to_stage(stage_dict):
+    try:
+        name = stage_dict['name']
+        stage_id = stage_dict['stage_id']
+        omega = stage_dict['omega']
+        stage = Stage(name, stage_id, omega)
+    except Exception:
+        print("Unknown error lol")
+    return stage
         
 def enter_match(defaults=True, omega=True):
     # TODO: Need type checking for all of this
@@ -256,4 +329,5 @@ def enter_test_match():
     print(match.get_synopsis())
 
 if __name__ == "__main__":
-    enter_match()
+    #enter_match()
+    pass
