@@ -7,7 +7,7 @@
 moves = ["jab", "ftilt", "dash", "fsmash", "dtilt", "dsmash", "utilt",
          "usmash", 'nspecial', 'sspecial', 'dspecial', 'uspecial', 'fthrow',
          'bthrow', 'dthrow', 'uthrow', 'nair', 'fair', 'bair', 'dair', 'uair']
-directions = ['right', 'left', 'up', 'down']
+directions = ['right', 'left', 'top', 'bottom']
 
 # Represents a KO on one player. For now, only applies to 1v1
 # move: the move, described by uair, bthrow, dspecial, jab, etc

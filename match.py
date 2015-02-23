@@ -17,17 +17,17 @@ class Match(object):
     # TODO: Make this prettier
     def get_synopsis(self):
         winner = self.get_winner()
-        winner_name = winner.smasher.name
+        winner_tag = winner.smasher.tag
         winner_fighter = winner.fighter.name
 
         loser = self.get_loser()
-        loser_name = loser.smasher.name
+        loser_tag = loser.smasher.tag
         loser_fighter = loser.fighter.name
 
         synopsis = "{0}\n".format(self.date)
-        synopsis += "WINNER:\n------\n{0} as {1}\n".format(winner_name,
+        synopsis += "WINNER:\n------\n{0} as {1}\n".format(winner_tag,
                                                           winner_fighter)
-        synopsis += "\nLOSER:\n------\n{0} as {1}\n".format(loser_name,
+        synopsis += "\nLOSER:\n------\n{0} as {1}\n".format(loser_tag,
                                                             loser_fighter)
         synopsis += "on {0}\n".format(self.stage.name)
         return synopsis

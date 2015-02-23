@@ -32,7 +32,7 @@ from stage import Stage
 dt = datetime.datetime.now()
 dur = 60
 lylat = Stage(name="Lylat Cruise")
-smasher_lt = Smasher(name="Lt Wheat")
+smasher_lt = Smasher(tag="Lt Wheat")
 luigi = Fighter(name="Luigi")
 mario = Fighter(name="Mario")
 kos1 = [KO("uspecial",101,"up",54), KO("fsmash",120,"right",146)]
@@ -49,9 +49,6 @@ stats_lt={"falls": 1, "SDs": 0, "time_alive": -1, "damage_given": 286,
 player1 = Player(smasher_lt, luigi, True, kos1, stats_lt)
 player2 = Player(smasher_lt, mario, False, kos2, stats_lt)
 
-
-match_test={"date": datetime.datetime(2014, 11, 21), "duration": 186,
-       "stage": "Gaur Plains", "player1": player1, "player2": player2}
 
 #smash_db_name = "smash_wii_u"
 smash_db_name = "test_db"
@@ -152,9 +149,10 @@ def dict_to_player(player_dict):
 
 def dict_to_smasher(smasher_dict):
     try:
-        name = smasher_dict['name']
+        mii_name = smasher_dict['mii_name']
+        tag = smasher_dict['tag']
         smasher_id = smasher_dict['smasher_id']
-        smasher = Smasher(name, smasher_id)
+        smasher = Smasher(mii_name, tag, smasher_id)
     except Exception:
         print("Unknown error lol")
     return smasher
@@ -168,7 +166,8 @@ def dict_to_stage(stage_dict):
     except Exception:
         print("Unknown error lol")
     return stage
-        
+
+# TODO: This needs some work after all the refactoring stuff.
 def enter_match(defaults=True, omega=True):
     # TODO: Need type checking for all of this
     # TODO: Escape accidentally hitting enter, except where blanks are
