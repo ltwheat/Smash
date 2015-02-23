@@ -4,9 +4,6 @@ from res import constants
 
 class Match(object):
     def __init__(self, date, duration, stage, player1, player2, time_limit=300):
-        # TODO: 3DS only records date not time--is WiiU different? If not,
-        #       should we come up with a way of recording time or is date
-        #       sufficient?
         # TODO: Type checks
         self.date = date
         self.duration = duration
