@@ -4,6 +4,7 @@ import datetime
 import pymongo
 import traceback
 
+from common_mongo import smash_conn
 from fighter import Fighter
 from ko import KO
 from match import Match
@@ -27,8 +28,6 @@ from stage import Stage
 # longest_drought: longest amount of time without throwing out an attack
 # transformation_time: total time spent in alternate state. Should always
 #                      be zero in FG
-
-# TODO: convert from doc to object
 dt = datetime.datetime.now()
 dur = 60
 lylat = Stage(name="Lylat Cruise")
@@ -50,24 +49,6 @@ player1 = Player(smasher_lt, luigi, True, kos1, stats_lt)
 player2 = Player(smasher_lt, mario, False, kos2, stats_lt)
 
 
-#smash_db_name = "smash_wii_u"
-smash_db_name = "test_db"
-fg_coll_name = "for_glory"
-### Mongodb notes ###
-#   1) Connection/Client -> Database -> Collection
-#      b) client=pymongo.MongoClient()
-#         db=pymongo.database.Database(client, "db_name")
-#         db.coll_name.insert({"sample":"dict"})
-#      b) client=pymongo.MongoClient()
-#         db=client['db_name']
-#         coll=db['coll_name']
-#         coll.insert({"sample":"dict"})
-#   2) Collection won't actually exist until data is inserted
-#   3) Commonly used gets:
-#      a) coll/conn.database_names()# returns all db names
-#      b) db.collection_names()# returns all collection names in db
-#      c) coll.find_one()# returns (random?) single item from coll
-#      d) list(coll.find())# returns everything in coll. Must be cast
 def store_match(match):
     try:
         client = pymongo.MongoClient()
@@ -80,7 +61,7 @@ def store_match(match):
         match_id = coll.find().count()
         # TODO: If store_match is gonna be a shared method, then the match_id
         #       needs to be assigned in a different method (that also has
-        #       mongo access?
+        #       mongo access?) 
         match['match_id'] = match_id
         for db_match in list(coll.find()):
             if match_id == db_match['match_id']:
@@ -94,6 +75,34 @@ def store_match(match):
     except pymongo.errors.DuplicateKeyError as dke:
         print(dke)
 
+# Store a smasher
+def store_smasher(smasher):
+    try:
+        client = pymongo.MongoClient()
+        # Automatically connects or creates if nonexistent
+        db = client[smash_db_name]
+        coll = db[smasher_coll_name]
+        # TODO: This check loops through every match in the db but I feel like
+        #       that probably won't scale? Should we keep a separate coll of
+        #       just match ids?
+        match_id = coll.find().count()
+        # TODO: If store_match is gonna be a shared method, then the match_id
+        #       needs to be assigned in a different method (that also has
+        #       mongo access?)
+        match['match_id'] = match_id
+        for db_match in list(coll.find()):
+            if match_id == db_match['match_id']:
+                err_msg = "Match with id {0} already found in " \
+                           "collection".format(match_id)
+                raise pymongo.errors.DuplicateKeyError(err_msg)
+        db_match_id = coll.insert(match)
+        print("Stored match of id {0}:".format(match_id))
+    except pymongo.errors.ConnectionFailure:
+        print("Could not connect to database")
+    except pymongo.errors.DuplicateKeyError as dke:
+        print(dke)
+
+# Construct a Fighter from a dict
 def dict_to_fighter(fighter_dict):
     try:
         name = fighter_dict['name']
@@ -103,6 +112,7 @@ def dict_to_fighter(fighter_dict):
         print("Unknown error lol")
     return fighter
 
+# Construct a KO from a dict
 def dict_to_ko(ko_dict):
     try:
         move = ko_dict['move']
@@ -115,6 +125,7 @@ def dict_to_ko(ko_dict):
         traceback.print_exc()
     return ko
 
+# Construct a Match from a dict
 def dict_to_match(match_dict):
     try:
         date = match_dict['date']
@@ -129,6 +140,7 @@ def dict_to_match(match_dict):
         traceback.print_exc()
     return match
 
+# Construct a Player from a dict
 def dict_to_player(player_dict):
     try:
         # Convert list of KOs
@@ -147,6 +159,7 @@ def dict_to_player(player_dict):
         traceback.print_exc()
     return player
 
+# Construct a Smasher from a dict
 def dict_to_smasher(smasher_dict):
     try:
         mii_name = smasher_dict['mii_name']
@@ -157,6 +170,7 @@ def dict_to_smasher(smasher_dict):
         print("Unknown error lol")
     return smasher
 
+# Construct a Stage from a dict
 def dict_to_stage(stage_dict):
     try:
         name = stage_dict['name']
