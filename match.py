@@ -15,6 +15,7 @@ class Match(object):
 
     # Return brief synopsis of match
     # TODO: Make this prettier
+    # TODO: Somehow include mii names, since most of these (FG) won't have tags
     def get_synopsis(self):
         winner = self.get_winner()
         winner_tag = winner.smasher.tag

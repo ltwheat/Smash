@@ -3,20 +3,11 @@
 from common_mongo import smash_conn
 from Smash.res import constants
 
-# TODO: There needs to be a distinction b/w tag and Nintendo Network name,
-#       e.g. "Lt Wheat" v "Mr. Wheat", since the latter is what shows up on
-#       the FG match results screen and is the only thing I know--no way to
-#       tell the other. Maybe Smasher can be instantiated with either?
-# TODO: Need to think about relationship b/w mii name, tag and id, which are
-#       necessary when, which need to be recorded with which in constants, etc
-# TODO: For now, mii_name is just an additional (unnecessary) argument. Its
-#       inclusion doesn't matter, as long as name is changed to tag now.
 smashers = constants.SMASHER_NAME_TO_ID
 
+# TODO: Make update method
 class Smasher(object):
     def __init__(self, mii_name="", tag="", smasher_id=-1):
-        # TODO: If mii_name is passed in WITH existing tag or id, we should
-        #       update the smasher's mii name in the coll
         store = False
         # TODO: This is too long, make it a separate method
         # Instantiation checks

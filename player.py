@@ -9,8 +9,6 @@ import traceback
 # of stats for that match.
 class Player(object):
     def __init__(self, smasher, fighter, winner, kos, stats, palette=0):
-        # winner being something other than a boolean can cause trouble down
-        # the road
         if type(winner) != bool:
             raise TypeError("winner must be a boolean!")
         if type(kos) != list:
