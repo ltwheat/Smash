@@ -18,6 +18,7 @@ from stage import Stage
 #    but do we need an external one? Should have one for players, at least.
 #    a) No way to differentiate other players aside from name, though...is this
 #       different in WiiU version?
+# 3) Long-term: Handle team matches
 
 
 ##### NOTES #####
@@ -56,6 +57,7 @@ def dict_to_fighter(fighter_dict):
         fighter = Fighter(name, fighter_id)
     except Exception:
         print("Unknown error lol")
+        traceback.print_exc()
     return fighter
 
 # Construct a KO from a dict
@@ -114,6 +116,7 @@ def dict_to_smasher(smasher_dict):
         smasher = Smasher(mii_name, tag, smasher_id)
     except Exception:
         print("Unknown error lol")
+        traceback.print_exc()
     return smasher
 
 # Construct a Stage from a dict
@@ -125,6 +128,7 @@ def dict_to_stage(stage_dict):
         stage = Stage(name, stage_id, omega)
     except Exception:
         print("Unknown error lol")
+        traceback.print_exc()
     return stage
 
 # Wrapper method for entering match info. Type check and ignore blank answers
@@ -144,39 +148,155 @@ def input_match_attr(prompt_string, attr_type=str):
     val = attr_type(val)
     return val
 
-# TODO: This needs some work after all the refactoring stuff.
-def enter_match(date_time=None, defaults=True, omega=True):
+def enter_ko():
+    ko_move = input_match_attr("Move? ")
+    ko_dmg = input_match_attr("% Damage? ", int)
+    ko_side = input_match_attr("Off of which side of the screen? ")
+    ko_time = input_match_attr("How long into the match (s)? ", int)
+    ko = KO(ko_move, ko_dmg, ko_side, ko_time)
+
+# Enter all kos for the match
+def enter_kos(for_glory=True):
+    # TODO: These should be config items, since we also use them in enter_stats
+    max_player_kos = 2
+    if for_glory == False:
+        max_player_kos = input_match_attr("How many stock? ", int)
+    max_match_kos = max_player_kos * 2 - 1
+
+    # Player attributes
+    kos1 = []
+    kos2 = []
+    sds1 = 0
+    sds2 = 0
+    all_kos_entered = False
+    while not all_kos_entered:
+        print("First death:")
+        sd = input_match_attr("Was it an SD?")
+        if sd.lower() in ['y', 'yes', 'true']:
+            if sds1 == max_player_kos or sds2 == max_player_kos:
+                all_kos_entered = True
+                continue
+            max_match_kos -= 1
+            player_sd = input_match_attr("Which player SD'd? ")
+            if player_sd == 1:
+                sds1 ++
+            else:
+                sds2 ++
+        else:
+            player_ko = input_match_attr("Which player had the first KO? ", int)
+            ko = enter_ko()
+            if player_ko == 1:
+                kos1.append(ko)
+            # Assume the other player can have any port, not just 2.
+            else:
+                kos2.append(ko)
+
+            if len(kos1) + len(kos2) == max_match_kos:
+                all_kos_entered = True
+    return kos1, kos2, sds1, sds2
+
+# Enter Stage
+def enter_stage(for_glory=True):
+    stage_name = input_match_attr("Stage: ")
+    omega = True
+    if not for_glory == True:
+        omega = input(" (Omega?) ", bool)
+    stage = Stage(name=stage_name, omega=omega)
+    return stage
+
+# Enter Smasher
+# TODO: Should this allow for entering a smasher with an id, too?
+def enter_smasher(defaults=True):
+    smasher_tag = "Lt Wheat"
+    smasher_mii_name = "Mr. Wheat"
+    if not defaults == True:
+        smasher_tag = input_match_attr("Tag: ")
+        smasher_mii_name = input_match_attr("Mii Name: ")
+    smasher = Smasher(mii_name=smasher_mii_name, tag=smasher_tag)
+    return smasher
+
+# Enter Player stats
+def enter_player_stats(winner, kos, sds, for_glory=True):
+    # TODO: Think about passing in both player's information--if we do, we can
+    #       fairly easily calculate the following:
+    #       falls
+    #       peak_damage
+    #       max_launch(er)_speed
+    stats = {}
+    max_player_kos = 2
+    if for_glory == False:
+        max_player_kos = input_match_attr("How many stock? ")
+    stats['falls'] = max_player_kos
+    if winner == True:
+        stats['falls'] = input_match_attr("Falls: ", int)
+    stats['SDs'] = sds
+    # TODO: FOR GLORY: time_alive doesn't need to be entered--if it's for the
+    #       winner, it's n/a or -1, and for the loser, it's the same as
+    #       duration...so pass in duration
+    time_alive = -1
+    if not winner:
+        if for_glory == True:
+            #time_alive = duration
+            pass
+        #else:v1
+        time_alive = input_match_attr("Time Alive: ", int)
+    # TODO: Put in additional checks here, such as ground_time + air_time can't
+    #       be more than time_alive, etc
+    stats['time_alive'] = time_alive
+    stats['damage_given'] = input_match_attr("Damage Given: ", int)
+    stats['damage_taken'] = input_match_attr("Damage Taken: ", int)
+    stats['damage_recovered'] = input_match_attr("Damage Recovered: ", int)
+    stats['peak_damage'] = input_match_attr("Peak Damage: ", int)
+    stats['launch_distance'] = input_match_attr("Launch Distance: ", int)
+    stats['ground_time'] = input_match_attr("Ground Time: ", int)
+    stats['air_time'] = input_match_attr("Air Time: ", int)
+    stats['hit_percentage'] = input_match_attr("Hit Percentage: ", int)
+    stats['ground_attacks'] = input_match_attr("Ground Attacks: ", int)
+    stats['air_attacks'] = input_match_attr("Air Attacks: ", int)
+    stats['smash_attacks'] = input_match_attr("Smash Attacks: ", int)
+    stats['grabs'] = input_match_attr("Grabs: ", int)
+    # TODO: throws must be 0 if grabs is 0
+    stats['throws'] = 0
+    if stats['grabs'] != 0:
+        stats['throws'] = input_match_attr("Throws: ", int)
+    stats['edge_grabs'] = input_match_attr("Edge Grabs: ", int)
+    stats['projectiles'] = input_match_attr("Projectiles: ", int)
+    stats['items_grabbed'] = input_match_attr("Items Grabbed: ", int)
+    stats['max_launch_speed'] = input_match_attr("Max Launch Speed: ", int)
+    stats['max_launcher_speed'] = input_match_attr("Max Launcher Speed: ", int)
+    stats['longest_drought'] = input_match_attr("Longest Drought: ", int)
+    stats['transformation_time'] = input_match_attr("Transformation Time: ",int)
+    # Matches with final smashes aren't worth recording
+
+    return stats
+
+# Enter Player
+def enter_player(kos=[],sds=0,defaults=True, for_glory=True):
+    # Enter Smasher
+    smasher = enter_smasher(defaults)
+
+    # Enter Fighter--only needs name, so no separate func
+    fighter_name = input_match_attr("Character: ")
+    fighter = Fighter(name=fighter_name)
+
+    # Did they win?
+    winner = input_match_attr("Did you win ('false' for 'no')", bool)
+
+    print("Other stats:")
+    stats = enter_player_stats(winner, kos, sds, for_glory)
+
+    player_palette = input_match_attr("Palette #: ", int)
+
+    player = Player(smasher, fighter, winner, kos, stats, player_palette)
+    return player
+
+# Manually enter all match info via prompt
+def enter_match(date_time=None, for_glory=True, defaults=True, omega=True):
     print("Enter match information:")
 
-    # TODO: Putting KO entry at the beginning doesn't really help unless we
-    #       record them as a come, rather than one player at a time.
-    kos1 = []
+    # Enter KOs
     print("Assuming you're watching the replay, tell me about the KOs first")
-    # TODO: For Glory, limit b/w 0 and 2
-    num_kos1 = int(input("How many KOs did you get? "))
-    if num_kos1 != 0:
-        print("Tell me about those.")
-    for num in range(num_kos1):
-        print("KO {0}:".format(num + 1))
-        ko_move = input_match_attr("Move? ")
-        ko_dmg = input_match_attr("% Damage? ", int)
-        ko_side = input_match_attr("Off of which side of the screen? ")
-        ko_time = input_match_attr("How long into the match (s)? ", int)
-        ko = KO(ko_move, ko_dmg, ko_side, ko_time)
-        kos1.append(ko)
-
-    kos2 = []
-    num_kos2 = int(input("How many KOs did they get? "))
-    if num_kos2 != 0:
-        print("Tell me about those.")
-    for num in range(num_kos2):
-        print("KO {0}:".format(num + 1))
-        ko_move = input_match_attr("Move? ")
-        ko_dmg = input_match_attr("% Damage? ", int)
-        ko_side = input_match_attr("Off of which side of the screen? ")
-        ko_time = input_match_attr("How long into the match (s)? ", int)
-        ko = KO(ko_move, ko_dmg, ko_side, ko_time)
-        kos2.append(ko)
+    kos1, kos2, sds1, sds2 = enter_kos(for_glory)
                       
     # TODO: Parse all kinds of datetime strings, or come up with another way
     #       to enter them (optional arg?), eg Feb 2, February 2nd, 2/2
@@ -190,117 +310,14 @@ def enter_match(date_time=None, defaults=True, omega=True):
         date_time = datetime.datetime(year, month, day)
     duration = input_match_attr("Duration (s): ", int)
 
-    # TODO: Make this a separate function
-    stage_name = input_match_attr("Stage: ")
-    if not defaults == True:
-        omega = input(" (Omega?) ", bool)
-    stage = Stage(name=stage_name, omega=omega)
+    # Enter Stage
+    stage = enter_stage(for_glory)
+
+    # Enter Players
     print("First, how did you do?")
-
-    # TODO: Make this a separate function
     print("PLAYER 1 (You):")
-    smasher1_tag = "Lt Wheat"
-    smasher1_mii_name = "Mr. Wheat"
-    if not defaults == True:
-        smasher1_tag = input_match_attr("Tag: ")
-        smasher1_mii_name = input_match_attr("Mii Name: ")
-    smasher1 = Smasher(mii_name=smasher1_mii_name, tag=smasher1_tag)
-    
-    fighter1_name = input_match_attr("Character: ")
-    fighter1 = Fighter(name=fighter1_name)
-    
-    winner1 = input_match_attr("Did you win ('false' for 'no')", bool)
-    stats1 = {}
-
-    print("Other stats:")
-    stats1['falls'] = input_match_attr("Falls: ", int)
-    stats1['SDs'] = input_match_attr("SDs (Remember this is special): ", int)
-    # TODO: FOR GLORY: time_alive doesn't need to be entered--if it's for the
-    #       winner, it's n/a or -1, and for the loser, it's the same as
-    #       duration
-    stats1['time_alive'] = -1
-    if not winner1:
-        stats1['time_alive'] = input_match_attr("Time Alive: ", int)
-    # TODO: FOR GLORY: damage_given and damage_taken are inverses for opponents
-    stats1['damage_given'] = input_match_attr("Damage Given: ", int)
-    stats1['damage_taken'] = input_match_attr("Damage Taken: ", int)
-    stats1['damage_recovered'] = input_match_attr("Damage Recovered: ", int)
-    # TODO: peak_damage can be calculated from all KOs
-    stats1['peak_damage'] = input_match_attr("Peak Damage: ", int)
-    stats1['launch_distance'] = input_match_attr("Launch Distance: ", int)
-    stats1['ground_time'] = input_match_attr("Ground Time: ", int)
-    stats1['air_time'] = input_match_attr("Air Time: ", int)
-    stats1['hit_percentage'] = input_match_attr("Hit Percentage: ", int)
-    stats1['ground_attacks'] = input_match_attr("Ground Attacks: ", int)
-    stats1['air_attacks'] = input_match_attr("Air Attacks: ", int)
-    stats1['smash_attacks'] = input_match_attr("Smash Attacks: ", int)
-    stats1['grabs'] = input_match_attr("Grabs: ", int)
-    # TODO: throws must be 0 if grabs is 0
-    stats1['throws'] = input_match_attr("Throws: ", int)
-    stats1['edge_grabs'] = input_match_attr("Edge Grabs: ", int)
-    stats1['projectiles'] = input_match_attr("Projectiles: ", int)
-    stats1['items_grabbed'] = input_match_attr("Items Grabbed: ", int)
-    # TODO: FOR GLORY: max_launch(er)_speed are inverses for opponents
-    stats1['max_launch_speed'] = input_match_attr("Max Launch Speed: ", int)
-    stats1['max_launcher_speed'] = input_match_attr("Max Launcher Speed: ", int)
-    stats1['longest_drought'] = input_match_attr("Longest Drought: ", int)
-    stats1['transformation_time'] = input_match_attr("Transformation Time: ",
-                                                     int)
-    stats1['final_smashes'] = input_match_attr("Final Smashes: ", int)
-
-    player1_palette = input_match_attr("Palette #: ", int)
-
-    player1 = Player(smasher1, fighter1, winner1, kos1, stats1,
-                     player1_palette)
-    # TODO: Make this a separate function
-    print("PLAYER 2 (Opponent):")
-    # TODO: This needs to allow for other names, figure out a solution for
-    #       that first
-    smasher2_tag = ""
-    if not defaults == True:
-        smasher2_tag = input_match_attr("Tag: ")
-    smasher2_mii_name = input_match_attr("Mii name: ")
-    smasher2 = Smasher(mii_name=smasher2_mii_name, tag=smasher2_tag)
-    
-    fighter2_name = input_match_attr("Character: ")
-    fighter2 = Fighter(name=fighter2_name)
-    
-    winner2 = not winner1
-    
-    stats2 = {}
-    stats2['falls'] = input_match_attr("Falls: ", int)
-    stats2['SDs'] = input_match_attr("SDs (Remember this is special): ", int)
-    stats2['time_alive'] = -1
-    if not winner2:
-        stats2['time_alive'] = input_match_attr("Time Alive: ", int)
-    stats2['damage_given'] = input_match_attr("Damage Given: ", int)
-    stats2['damage_taken'] = input_match_attr("Damage Taken: ", int)
-    stats2['damage_recovered'] = input_match_attr("Damage Recovered: ", int)
-    stats2['peak_damage'] = input_match_attr("Peak Damage: ", int)
-    stats2['launch_distance'] = input_match_attr("Launch Distance: ", int)
-    stats2['ground_time'] = input_match_attr("Ground Time: ", int)
-    stats2['air_time'] = input_match_attr("Air Time: ", int)
-    stats2['hit_percentage'] = input_match_attr("Hit Percentage: ", int)
-    stats2['ground_attacks'] = input_match_attr("Ground Attacks: ", int)
-    stats2['air_attacks'] = input_match_attr("Air Attacks: ", int)
-    stats2['smash_attacks'] = input_match_attr("Smash Attacks: ", int)
-    stats2['grabs'] = input_match_attr("Grabs: ", int)
-    stats2['throws'] = input_match_attr("Throws: ", int)
-    stats2['edge_grabs'] = input_match_attr("Edge Grabs: ", int)
-    stats2['projectiles'] = input_match_attr("Projectiles: ", int)
-    stats2['items_grabbed'] = input_match_attr("Items Grabbed: ", int)
-    stats2['max_launch_speed'] = input_match_attr("Max Launch Speed: ", int)
-    stats2['max_launcher_speed'] = input_match_attr("Max Launcher Speed: ", int)
-    stats2['longest_drought'] = input_match_attr("Longest Drought: ", int)
-    stats2['transformation_time'] = input_match_attr("Transformation Time: ",
-                                                     int)
-    stats2['final_smashes'] = input_match_attr("Final Smashes: ", int)
-
-    player2_palette = input_match_attr("Palette #: ", int)
-
-    player2 = Player(smasher2, fighter2, winner2, kos2, stats2,
-                     player2_palette)
-
+    player1 = enter_player(kos1, sds1, defaults, for_glory)
+    player2 = enter_player(kos2, sds2, defaults, for_glory)
 
     match = Match(date_time, duration, stage, player1, player2)
     smash_conn.store_match(match.convert_to_dict())
