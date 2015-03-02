@@ -1,7 +1,6 @@
 #!/usr/bin/env
 
 import datetime
-import pymongo
 import traceback
 
 from common_mongo import smash_conn
