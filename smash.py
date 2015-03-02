@@ -178,9 +178,9 @@ def enter_kos(for_glory=True):
             max_match_kos -= 1
             player_sd = input_match_attr("Which player SD'd? ")
             if player_sd == 1:
-                sds1 ++
+                sds1 += 1
             else:
-                sds2 ++
+                sds2 += 1
         else:
             player_ko = input_match_attr("Which player had the first KO? ", int)
             ko = enter_ko()
