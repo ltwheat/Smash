@@ -16,6 +16,8 @@ directions = ['right', 'left', 'top', 'bottom']
 # time: number of seconds into the match the victim was KO'd
 class KO(object):
     # TODO: What about a sweetspot boolean?
+    # TODO: What about charge attribute, for smashes or certain specials?
+    # TODO: What about rage (over 100%) attr?
     def __init__(self, move, damage, direction, time):
         # Instantiation checks
         if move not in moves:

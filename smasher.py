@@ -38,7 +38,12 @@ class Smasher(object):
                     tag = smasher['tag']
                     smasher_id = smasher['smasher_id']
                 else:
-                    smasher_id = max(self.get_all_smasher_ids()) + 1
+                    # Just assign IDs consecutively for now. If there are no
+                    # existing Smashers, this is the first one, so give it ID 1
+                    all_smasher_ids = self.get_all_smasher_ids()
+                    smasher_id = 1
+                    if len(all_smasher_ids) != 0:
+                        smasher_id = max(all_smasher_ids) + 1
                     store = True
             else:
                 smasher = smash_conn.get_smasher({'smasher_id':smasher_id})
