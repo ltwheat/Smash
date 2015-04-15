@@ -8,7 +8,16 @@ stages = constants.STAGE_NAME_TO_ID
 
 class Stage(object):
     def __init__(self, name="", stage_id=-1, omega=False):
-        cap_name = string.capwords(name)
+        # THIS is an enormous pain in the ass--there does not seem to be one
+        # universal Python string manipulation method to account for all the
+        # variants of Smash 4's punctuation in stage names. .title() seems to
+        # be the best option, but will not work for Yoshi's Island, Luigi's
+        # Mansion (apostrophes), 75m or either PAC stage.
+        # TODO: Figure out a solution for the .title() exceptions
+        cap_name = name.title()
+        if 'yoshi' in name.lower() or 'pac' in name.lower() or \
+           'luigi' in name.lower() or '75' in name:
+            cap_name = name
         # Type/value checks
         if name == "" and stage_id == -1:
             raise ValueError("Stage must be instantiated with either name or id")
@@ -42,7 +51,7 @@ class Stage(object):
 
     # Return id associated with stage name
     def get_stage_id_for_name(self, name):
-        return stages[string.capwords(name)]
+        return stages[name]
 
     # Nicer than Stage.__dict__
     def convert_to_dict(self):

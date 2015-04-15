@@ -186,7 +186,7 @@ def enter_kos(for_glory=True):
             #    all_kos_entered = True
             #    continue
             #max_match_kos -= 1
-            player_sd = input_match_attr("Which player SD'd? ")
+            player_sd = input_match_attr("Which player SD'd? ", int)
             if player_sd == 1:
                 sds1 += 1
             else:
@@ -337,7 +337,6 @@ def enter_match(date_time=None, for_glory=True, defaults=True, omega=True):
     match = Match(date_time, duration, stage, player1, player2)
     smash_conn.store_match(match.convert_to_dict())
     print(match.get_synopsis())
-    print(match)
 
 def enter_test_match():
     match = Match(dt, dur, lylat, player1, player2)
