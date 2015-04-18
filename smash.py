@@ -10,13 +10,12 @@ from match import Match
 from player import Player
 from smasher import Smasher
 from stage import Stage
+
 ##### TODOS #####
 # 1) A couple of the keys should always be 0 for FG--have the script error
 #    out if they aren't
 # 2) IDs? object_id (match_id, in this case) is stored in mongo automatically
 #    but do we need an external one? Should have one for players, at least.
-#    a) No way to differentiate other players aside from name, though...is this
-#       different in WiiU version?
 # 3) Long-term: Handle team matches
 
 
@@ -27,25 +26,26 @@ from stage import Stage
 # longest_drought: longest amount of time without throwing out an attack
 # transformation_time: total time spent in alternate state. Should always
 #                      be zero in FG
-dt = datetime.datetime.now()
-dur = 60
-lylat = Stage(name="Lylat Cruise")
-smasher_lt = Smasher(tag="Lt Wheat")
-luigi = Fighter(name="Luigi")
-mario = Fighter(name="Mario")
-kos1 = [KO("uspecial",101,"top",54), KO("fsmash",120,"right",146)]
-kos2 = [KO("dsmash",143,"left",123)]
-stats_lt={"falls": 1, "SDs": 0, "time_alive": -1, "damage_given": 286,
-         "damage_taken": 190, "damage_recovered": 0, "peak_damage": 105,
-         "launch_distance": 302, "ground_time": 115, "air_time": 71,
-         "hit_percentage": 44, "ground_attacks": 59, "air_attacks": 20,
-         "smash_attacks": 8, "grabs": 13, "throws": 4, "edge_grabs": 5,
-         "projectiles": 25, "items_grabbed": 0, "max_launch_speed": 130,
-         "max_launcher_speed": 145, "longest_drought": 9,
-         "transformation_time": 0, "final_smashes": 0}
 
-player1 = Player(smasher_lt, luigi, True, kos1, stats_lt)
-player2 = Player(smasher_lt, mario, False, kos2, stats_lt)
+### SAMPLE OBJECTS ###
+#dt = datetime.datetime.now()
+#dur = 60
+#lylat = Stage(name="Lylat Cruise")
+#smasher_lt = Smasher(tag="Lt Wheat")
+#luigi = Fighter(name="Luigi")
+#mario = Fighter(name="Mario")
+#kos1 = [KO("uspecial",101,"top",54), KO("fsmash",120,"right",146)]
+#kos2 = [KO("dsmash",143,"left",123)]
+#stats_lt={"falls": 1, "SDs": 0, "time_alive": -1, "damage_given": 286,
+#         "damage_taken": 190, "damage_recovered": 0, "peak_damage": 105,
+#         "launch_distance": 302, "ground_time": 115, "air_time": 71,
+#         "hit_percentage": 44, "ground_attacks": 59, "air_attacks": 20,
+#         "smash_attacks": 8, "grabs": 13, "throws": 4, "edge_grabs": 5,
+#         "projectiles": 25, "items_grabbed": 0, "max_launch_speed": 130,
+#         "max_launcher_speed": 145, "longest_drought": 9,
+#         "transformation_time": 0, "final_smashes": 0}
+#player1 = Player(smasher_lt, luigi, True, kos1, stats_lt)
+#player2 = Player(smasher_lt, mario, False, kos2, stats_lt)
 
 
 # Construct a Fighter from a dict
@@ -313,7 +313,7 @@ def enter_match(date_time=None, for_glory=True, defaults=True, omega=True):
                       
     # TODO: Parse all kinds of datetime strings, or come up with another way
     #       to enter them (optional arg?), eg Feb 2, February 2nd, 2/2
-    date = input("Date: (NOTE: This doesn't actually matter)")
+    #date = input("Date: (NOTE: This doesn't actually matter)")
     if date_time == None:
         # TODO: There's probably a cleaner way to do this...
         date_time = datetime.datetime.today()
