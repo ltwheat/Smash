@@ -11,6 +11,8 @@ from player import Player
 from smasher import Smasher
 from stage import Stage
 
+from conf import config
+
 ##### TODOS #####
 # 1) A couple of the keys should always be 0 for FG--have the script error
 #    out if they aren't
@@ -241,7 +243,7 @@ def enter_player_stats(winner, kos, sds, for_glory=True):
     #       peak_damage
     #       max_launch(er)_speed
     stats = {}
-    max_player_kos = 2
+    max_player_kos = config.FOR_GLORY_MAX_KOS
     if for_glory == False:
         max_player_kos = input_match_attr("How many stock? ")
     stats['falls'] = max_player_kos - sds
@@ -289,7 +291,7 @@ def enter_player_stats(winner, kos, sds, for_glory=True):
     return stats
 
 # Enter Player
-def enter_player(kos=[],sds=0,defaults=True, for_glory=True):
+def enter_player(kos=[], falls=0, sds=0, winner = False, defaults=True):
     # Enter Smasher
     smasher = enter_smasher(defaults)
 
@@ -297,15 +299,10 @@ def enter_player(kos=[],sds=0,defaults=True, for_glory=True):
     fighter_name = input_match_attr("Character: ")
     fighter = Fighter(name=fighter_name)
 
-    # Did they win?
-    winner = input_match_attr("Did they win ('false' for 'no')? ", bool)
-
-    print("Other stats:")
-    stats = enter_player_stats(winner, kos, sds, for_glory)
-
+    # Which palette swap did they use?
     player_palette = input_match_attr("Palette # (0 for default): ", int)
 
-    player = Player(smasher, fighter, winner, kos, stats, player_palette)
+    player = Player(smasher, fighter, winner, kos, falls, sds, player_palette)
     return player
 
 # Manually enter all match info via prompt
@@ -315,6 +312,16 @@ def enter_match(date_time=None, for_glory=True, defaults=True, omega=True):
     # Enter KOs
     print("Assuming you're watching the replay, tell me about the KOs first")
     kos1, kos2, sds1, sds2, last_fall_time = enter_kos(for_glory)
+    falls1 = len(kos2)
+    falls2 = len(kos1)
+
+    # We know who the winner is based on who died fewer times
+    winner1 = False
+    winner2 = False
+    if (falls1 + sds1) > (falls2 + sds2):
+        winner2 = True
+    else:
+        winner1 = True
                       
     # TODO: Parse all kinds of datetime strings, or come up with another way
     #       to enter them (optional arg?), eg Feb 2, February 2nd, 2/2
@@ -337,12 +344,12 @@ def enter_match(date_time=None, for_glory=True, defaults=True, omega=True):
     stage = enter_stage(for_glory)
 
     # Enter Players
-    print("First, how did you do?")
     print("PLAYER 1 (You):")
-    player1 = enter_player(kos1, sds1, defaults, for_glory)
-    print("Next, how did your opponent do?")
+    print("Who did you play as?")
+    player1 = enter_player(kos1, falls1, sds1, winner1, defaults, for_glory)
     print("PLAYER 2 (Opponent):")
-    player2 = enter_player(kos2, sds2, False, for_glory)
+    print("Who did they play as?")
+    player2 = enter_player(kos2, falls2, sds2, winner2, False, for_glory)
 
     match = Match(date_time, duration, stage, player1, player2)
     smash_conn.store_match(match.convert_to_dict())
