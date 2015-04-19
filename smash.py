@@ -174,23 +174,29 @@ def enter_kos(for_glory=True):
     kos2 = []
     sds1 = 0
     sds2 = 0
+    last_fall_time = -1
     all_kos_entered = False
     while not all_kos_entered:
         if len(kos1) + len(kos2) + sds1 + sds2 == 0:
             print("First death:")
         else:
             print("Next death:")
+
+        # SD
         sd = input_match_attr("Was it an SD? ")
         if sd.lower() in ['y', 'yes', 'true']:
-            #if sds1 == max_player_kos or sds2 == max_player_kos:
-            #    all_kos_entered = True
-            #    continue
-            #max_match_kos -= 1
+            # TODO: Think about adding a time for SDs, or, *gasp*, making a
+            #       separate class for them
             player_sd = input_match_attr("Which player SD'd? ", int)
             if player_sd == 1:
                 sds1 += 1
             else:
                 sds2 += 1
+            # The last known fall was a SD, so we don't know when the last fall
+            # was
+            last_fall_time = -1
+
+        # KO
         else:
             player_ko = input_match_attr("Which player scored the KO? ", int)
             ko = enter_ko()
@@ -199,14 +205,13 @@ def enter_kos(for_glory=True):
             # Assume the other player can have any port, not just 2.
             else:
                 kos2.append(ko)
-
-            #if len(kos1) + len(kos2) == max_match_kos:
-            #    all_kos_entered = True
+            last_fall_time = ko.time
+            
         p1_falls = len(kos2) + sds1
         p2_falls = len(kos1) + sds2
         all_kos_entered = (p1_falls == max_player_kos) or \
                           (p2_falls == max_player_kos)
-    return kos1, kos2, sds1, sds2
+    return kos1, kos2, sds1, sds2, last_fall_time
 
 # Enter Stage
 def enter_stage(for_glory=True):
@@ -309,7 +314,7 @@ def enter_match(date_time=None, for_glory=True, defaults=True, omega=True):
 
     # Enter KOs
     print("Assuming you're watching the replay, tell me about the KOs first")
-    kos1, kos2, sds1, sds2 = enter_kos(for_glory)
+    kos1, kos2, sds1, sds2, last_fall_time = enter_kos(for_glory)
                       
     # TODO: Parse all kinds of datetime strings, or come up with another way
     #       to enter them (optional arg?), eg Feb 2, February 2nd, 2/2
@@ -321,7 +326,12 @@ def enter_match(date_time=None, for_glory=True, defaults=True, omega=True):
         month = date_time.month
         year = date_time.year
         date_time = datetime.datetime(year, month, day)
-    duration = input_match_attr("Duration (s): ", int)
+
+    # If we know the time of the last fall, we know how long the match lasted
+    if last_fall_time != None:
+        duration = last_fall_time
+    else:
+        duration = input_match_attr("Duration (s): ", int)
 
     # Enter Stage
     stage = enter_stage(for_glory)
