@@ -5,19 +5,32 @@ import traceback
 # The Player object represents the actual performance of one Smasher
 # in a given match. Thus, a player has ("is", at its core) a Smasher,
 # represented in the Match by a Fighter (using the palette swap determined
-# by 'palette'), a boolean to determine whether it was victorious, and a dict
-# of stats for that match.
+# by 'palette'), a boolean to determine whether it was victorious, a list of its
+# KOs, and the number of falls and SDs it suffered.
 class Player(object):
-    def __init__(self, smasher, fighter, winner, kos, stats, palette=0):
+    def __init__(self, smasher, fighter, winner, kos, falls, sds, palette=0):
+        # Type-checks
         if type(winner) != bool:
             raise TypeError("winner must be a boolean!")
         if type(kos) != list:
             raise TypeError("kos must be a list")
+        if type(falls) != int:
+            raise TypeError("falls must be an int")
+        if type(sds) != int:
+            raise TypeError("sds must be an int")
+
+        # Logic checks
+        if sds > falls:
+            raise ValueError("Can't have more SDs than Falls")
+
         # TODO: Type-check these guys?
         self.smasher = smasher
         self.fighter = fighter
+
         self.winner = winner
         self.kos = kos
+        self.falls = falls
+        self.sds = sds
 
         max_palette_id = 7
         # Little Mac has 16 palette swaps
@@ -30,15 +43,11 @@ class Player(object):
         self.palette = palette
 
         # Populate match statistics
-        self.stats = {}
+        #self.stats = {}
         # TODO: This segment should be a lot simpler, and the required stats
         #       should be in some config or something instead of hard-coded
         #       here
-        try:
-            # TODO: since falls and SDs are all we have, just make them attrs
-            #       instead of items in a separate stats attr
-            self.stats['falls'] = stats['falls']
-            self.stats['SDs'] = stats['SDs']
+        #try:
             #========= CAN'T PUT IN MATCH CUZ REPLAYS SUCK =======#
             ##self.stats['time_alive'] = stats['time_alive']
             ##self.stats['damage_given'] = stats['damage_given']
@@ -62,9 +71,9 @@ class Player(object):
             ##self.stats['longest_drought'] = stats['longest_drought']
             ##self.stats['transformation_time'] = stats['transformation_time']
             ##self.stats['final_smashes'] = stats['final_smashes']
-        except KeyError:
-            print("Expected an item not contained in stats:")
-            print(traceback.print_exc())
+        #except KeyError:
+        #    print("Expected an item not contained in stats:")
+        #    print(traceback.print_exc())
 
     # Nicer than Player.__dict__
     def convert_to_dict(self):
@@ -75,6 +84,6 @@ class Player(object):
 
         player = {"smasher":self.smasher.convert_to_dict(),
                   "fighter":self.fighter.convert_to_dict(),
-                  "palette":self.palette, "kos":kos, "winner":self.winner,
-                  "stats":self.stats}
+                  "palette":self.palette, "kos":kos, "falls": self.falls,
+                  "sds": self.sds, "winner":self.winner}
         return player
