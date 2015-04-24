@@ -1,8 +1,16 @@
 #!/usr/bin/env
 
+import datetime
+
 class Match(object):
     def __init__(self, date, duration, stage, player1, player2, time_limit=300):
-        # TODO: Type checks
+        if type(date) != datetime.datetime:
+            raise TypeError("date must be datetime.datetime object")
+        if type(duration) != int:
+            raise TypeError("duration must be int")
+        if type(time_limit) != int:
+            raise TypeError("time_limit must be int")
+
         self.date = date
         self.duration = duration
         self.stage = stage
