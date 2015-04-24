@@ -1,7 +1,5 @@
 #!/usr/bin/env
 
-from res import constants
-
 class Match(object):
     def __init__(self, date, duration, stage, player1, player2, time_limit=300):
         # TODO: Type checks
@@ -14,27 +12,28 @@ class Match(object):
         self.time_limit = time_limit
 
     # Return brief synopsis of match
-    # TODO: Make this prettier
-    # TODO: Somehow include mii names, since most of these (FG) won't have tags
     def get_synopsis(self):
+        # Get winner and their character
         winner = self.get_winner()
         winner_tag = winner.smasher.tag
         if winner_tag == "":
             winner_tag = winner.smasher.mii_name
         winner_fighter = winner.fighter.name
 
+        # Get loser and their character
         loser = self.get_loser()
         loser_tag = loser.smasher.tag
         if loser_tag == "":
             loser_tag = loser.smasher.mii_name
         loser_fighter = loser.fighter.name
 
+        # Generate (formatted)  synopsis
         synopsis = "\n{0}\n".format(self.date)
         synopsis += "WINNER:\n------\n{0} as {1}\n".format(winner_tag,
                                                           winner_fighter)
         synopsis += "\nLOSER:\n------\n{0} as {1}\n".format(loser_tag,
                                                             loser_fighter)
-        synopsis += "on {0}\n".format(self.stage.name)
+        synopsis += "\non {0}\n".format(self.stage.name)
         return synopsis
 
     # Return winner

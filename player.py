@@ -23,10 +23,8 @@ class Player(object):
         if sds > falls:
             raise ValueError("Can't have more SDs than Falls")
 
-        # TODO: Type-check these guys?
         self.smasher = smasher
         self.fighter = fighter
-
         self.winner = winner
         self.kos = kos
         self.falls = falls
@@ -44,9 +42,6 @@ class Player(object):
 
         # Populate match statistics
         #self.stats = {}
-        # TODO: This segment should be a lot simpler, and the required stats
-        #       should be in some config or something instead of hard-coded
-        #       here
         #try:
             #========= CAN'T PUT IN MATCH CUZ REPLAYS SUCK =======#
             ##self.stats['time_alive'] = stats['time_alive']
