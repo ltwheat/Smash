@@ -49,3 +49,5 @@ STAGE_NAME_TO_ID = {"Final Destination": 0, "Battlefield": 1, "3D Land": 2,
                     "Smashville": 68, "Wii Fit Studio": 69, "Duck Hunt": 70,
                     "Wrecking Crew": 71, "Pilotwings": 72, "Wuhu Island": 73,
                     "Windy Hill Zone": 74, "PAC-LAND": 75, "Miiverse": 76}
+
+FIGHTER_NAME_TO_NUM_PALETTES = {"Little Mac": 16}

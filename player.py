@@ -1,6 +1,7 @@
 #!/usr/bin/env
 
 import traceback
+from res import constants
 
 # The Player object represents the actual performance of one Smasher
 # in a given match. Thus, a player has ("is", at its core) a Smasher,
@@ -30,10 +31,12 @@ class Player(object):
         self.falls = falls
         self.sds = sds
 
+        # Most fighters have 8 palette swaps--the ones who don't are listed
+        # in res.constants
         max_palette_id = 7
-        # Little Mac has 16 palette swaps
-        if self.fighter.name == "Little Mac":
-            max_palette_id = 15
+        fighter_to_num_palettes_dict = constants.FIGHTER_NAME_TO_NUM_PALETTES
+        if self.fighter.name in fighter_to_num_palettes_dict:
+            max_palette_id = fighter_to_num_palettes_dict[self.fighter.name] - 1
         if 0 > palette > max_palette_id:
             raise ValueError("Invalid palette id {0}: ".format(palette) +
                              "palette id must be between 0 and " +
