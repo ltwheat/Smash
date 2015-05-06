@@ -1,17 +1,16 @@
 #!/usr/bin/env
 
+from res import constants
 # TODO: Move to a config of some sort
 # TODO: Add variants and a standardizer, so for instance, accept 'downb' as
 #       well as 'dspecial', but still store as 'dspecial'. Same thing with
 #       direction, e.g. 'top' -> 'up'
-moves = ["jab", "ftilt", "dash", "fsmash", "dtilt", "dsmash", "utilt",
-         "usmash", 'nspecial', 'sspecial', 'dspecial', 'uspecial', 'fthrow',
-         'bthrow', 'dthrow', 'uthrow', 'nair', 'fair', 'bair', 'dair', 'uair']
 directions = ['right', 'left', 'top', 'bottom']
+moves = constants.MOVES
 
 # Represents a KO on one player. For now, only applies to 1v1
 # move: the move, described by uair, bthrow, dspecial, jab, etc
-# damage: the % damage the victim was add when they were knocked out
+# damage: the % damage the victim was at when they were knocked out
 # direction: which side of the screen the victim was knocked out of
 # time: number of seconds into the match the victim was KO'd
 class KO(object):

@@ -50,4 +50,12 @@ STAGE_NAME_TO_ID = {"Final Destination": 0, "Battlefield": 1, "3D Land": 2,
                     "Wrecking Crew": 71, "Pilotwings": 72, "Wuhu Island": 73,
                     "Windy Hill Zone": 74, "PAC-LAND": 75, "Miiverse": 76}
 
+# Any characters with a non-standard number of palette swaps should be mapped
+# here
 FIGHTER_NAME_TO_NUM_PALETTES = {"Little Mac": 16}
+
+# TODO: This is temporary until I get a better system in place and convert all existing matches
+MOVES = ["jab", "ftilt", "dash", "fsmash", "dtilt", "dsmash", "utilt",
+         "usmash", "nspecial", "sspecial", "dspecial", "uspecial",
+         "fthrow", "bthrow", "dthrow", "uthrow", "nair", "fair", "bair",
+         "dair", "uair"]
