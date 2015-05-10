@@ -28,7 +28,7 @@ STAGE_NAME_TO_ID = {"Final Destination": 0, "Battlefield": 1, "3D Land": 2,
                     "Arena Ferox": 18, "Flat Zone 2": 19,
                     "Reset Bomb Forest": 20, "Warioware, Inc.": 21,
                     "Distant Planet": 22, "Tortimer Island": 23,
-                    "Boxing Ring": 24, "Gaur Plains": 25, "Balloon Fight": 26,
+                    "Boxing Ring": 24, "Gaur Plain": 25, "Balloon Fight": 26,
                     "Living Room": 27, "Find Mii": 28, "Tomodachi Life": 29,
                     "Pictochat 2": 30, "Green Hill Zone": 31, "Wily Castle": 32,
                     "PAC-MAZE": 33, "Big Battlefield": 34, "Mario Galaxy": 35,
@@ -54,7 +54,8 @@ STAGE_NAME_TO_ID = {"Final Destination": 0, "Battlefield": 1, "3D Land": 2,
 # here
 FIGHTER_NAME_TO_NUM_PALETTES = {"Little Mac": 16}
 
-# TODO: This is temporary until I get a better system in place and convert all existing matches
+# TODO: This is temporary until I get a better system in place and convert all
+#       existing matches
 MOVES = ["jab", "ftilt", "dash", "fsmash", "dtilt", "dsmash", "utilt",
          "usmash", "nspecial", "sspecial", "dspecial", "uspecial",
          "fthrow", "bthrow", "dthrow", "uthrow", "nair", "fair", "bair",
