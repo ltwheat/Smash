@@ -20,9 +20,7 @@ class Player(object):
         if type(sds) != int:
             raise TypeError("sds must be an int")
 
-        # Logic checks
-        if sds > falls:
-            raise ValueError("Can't have more SDs than Falls")
+        # TODO: Check w/ config to make sure kos/falls/sds add up
 
         self.smasher = smasher
         self.fighter = fighter
