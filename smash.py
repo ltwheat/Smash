@@ -149,6 +149,15 @@ def input_match_attr(prompt_string, attr_type=str):
     val = attr_type(val)
     return val
 
+# Convert match clock time to elapsed time
+def convert_match_time_to_elapsed_time(match_clock, time_limit=300):
+    clock_units = match_clock.split(":")
+    minutes = int(clock_units[0])
+    seconds = int(clock_units[1])
+    time_elapsed = time_limit - (minutes*60) - seconds
+    return time_elapsed
+
+# Enter a single KO
 def enter_ko():
     # TODO: Since the move instantiation doesn't happen til the end of this
     #       method, the user can input a bad move and have to enter the rest of
@@ -157,8 +166,11 @@ def enter_ko():
     ko_move = input_match_attr("Move? ")
     ko_dmg = input_match_attr("% Damage? ", int)
     ko_side = input_match_attr("Off of which side of the screen? ")
-    # TODO: Ask for timer instead of length of time, more reliable
-    ko_time = input_match_attr("How long into the match (s)? ", int)
+    # TODO: Pass in for_glory so that we can override the default in the
+    #       conversion method
+    ko_clock_time = input_match_attr("What was the clock time " +
+                                     "(to the nearest second)? ")
+    ko_time = convert_match_time_to_elapsed_time(ko_clock_time)
     ko = KO(ko_move, ko_dmg, ko_side, ko_time)
     return ko
     #print("KO: {0}".format(ko.convert_to_dict()))
@@ -306,7 +318,7 @@ def enter_player(kos=[], falls=0, sds=0, winner = False, defaults=True):
     return player
 
 # Manually enter all match info via prompt
-def enter_match(date_time=None, for_glory=True, defaults=True, omega=True):
+def enter_match(date_time=None, for_glory=True, defaults=True):
     print("Enter match information:")
 
     # Enter KOs
@@ -335,7 +347,7 @@ def enter_match(date_time=None, for_glory=True, defaults=True, omega=True):
         date_time = datetime.datetime(year, month, day)
 
     # If we know the time of the last fall, we know how long the match lasted
-    if last_fall_time != None:
+    if last_fall_time != -1:
         duration = last_fall_time
     else:
         duration = input_match_attr("Duration (s): ", int)
@@ -346,10 +358,10 @@ def enter_match(date_time=None, for_glory=True, defaults=True, omega=True):
     # Enter Players
     print("PLAYER 1 (You):")
     print("Who did you play as?")
-    player1 = enter_player(kos1, falls1, sds1, winner1, defaults, for_glory)
+    player1 = enter_player(kos1, falls1, sds1, winner1, defaults)
     print("PLAYER 2 (Opponent):")
-    print("Who did they play as?")
-    player2 = enter_player(kos2, falls2, sds2, winner2, False, for_glory)
+    #print("Who did they play as?")
+    player2 = enter_player(kos2, falls2, sds2, winner2, False)
 
     match = Match(date_time, duration, stage, player1, player2)
     smash_conn.store_match(match.convert_to_dict())

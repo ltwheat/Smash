@@ -17,6 +17,8 @@ class KO(object):
     # TODO: What about a sweetspot boolean?
     # TODO: What about charge attribute, for smashes or certain specials?
     # TODO: What about rage (over 100%) attr?
+    # TODO: Shield break deaths (Jiggs, shield break on edge of stage -> fall)?
+    # TODO: Stage spike boolean?
     def __init__(self, move, damage, direction, time):
         # Instantiation checks
         if move not in moves:
