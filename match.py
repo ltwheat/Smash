@@ -41,7 +41,10 @@ class Match(object):
                                                           winner_fighter)
         synopsis += "\nLOSER:\n------\n{0} as {1}\n".format(loser_tag,
                                                             loser_fighter)
-        synopsis += "\non {0}\n".format(self.stage.name)
+        synopsis += "\non {0}".format(self.stage.name)
+        if self.stage.omega == True:
+            synopsis += " (Omega)"
+        synopsis += "\n"
         return synopsis
 
     # Return winner
