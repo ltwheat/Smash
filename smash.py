@@ -12,6 +12,7 @@ from smasher import Smasher
 from stage import Stage
 
 from conf import config
+from res import constants
 
 ##### TODOS #####
 # 1) A couple of the keys should always be 0 for FG--have the script error
@@ -20,34 +21,6 @@ from conf import config
 #    but do we need an external one? Should have one for players, at least.
 # 3) Long-term: Handle team matches
 
-
-##### NOTES #####
-# time_alive == 'out at'. Figured 'time_alive' was more clear
-# launch_distance: TODO: Is that me or him?
-# max_launch(er)_speed: which one is me, which one is him?
-# longest_drought: longest amount of time without throwing out an attack
-# transformation_time: total time spent in alternate state. Should always
-#                      be zero in FG
-
-### SAMPLE OBJECTS ###
-#dt = datetime.datetime.now()
-#dur = 60
-#lylat = Stage(name="Lylat Cruise")
-#smasher_lt = Smasher(tag="Lt Wheat")
-#luigi = Fighter(name="Luigi")
-#mario = Fighter(name="Mario")
-#kos1 = [KO("uspecial",101,"top",54), KO("fsmash",120,"right",146)]
-#kos2 = [KO("dsmash",143,"left",123)]
-#stats_lt={"falls": 1, "SDs": 0, "time_alive": -1, "damage_given": 286,
-#         "damage_taken": 190, "damage_recovered": 0, "peak_damage": 105,
-#         "launch_distance": 302, "ground_time": 115, "air_time": 71,
-#         "hit_percentage": 44, "ground_attacks": 59, "air_attacks": 20,
-#         "smash_attacks": 8, "grabs": 13, "throws": 4, "edge_grabs": 5,
-#         "projectiles": 25, "items_grabbed": 0, "max_launch_speed": 130,
-#         "max_launcher_speed": 145, "longest_drought": 9,
-#         "transformation_time": 0, "final_smashes": 0}
-#player1 = Player(smasher_lt, luigi, True, kos1, stats_lt)
-#player2 = Player(smasher_lt, mario, False, kos2, stats_lt)
 
 
 # Construct a Fighter from a dict
@@ -159,13 +132,22 @@ def convert_match_time_to_elapsed_time(match_clock, time_limit=300):
 
 # Enter a single KO
 def enter_ko():
-    # TODO: Since the move instantiation doesn't happen til the end of this
-    #       method, the user can input a bad move and have to enter the rest of
-    #       the info til an error is thrown, which is annoying. Maybe check the
-    #       acceptable moves right after the move is entered?
+    # The checks on moves and directions performed here are also performed in
+    # the instantiation of the KO itself, however I've copied them here so
+    # that the script will throw an error at the first sign of bad data
+    # rather than making the user input all three KO attrs and then throwing
+    # an error. This won't be necessary with a UI.
     ko_move = input_match_attr("Move? ")
+    if ko_move not in constants.MOVES:
+        print("move must be one of the following:")
+        print(constants.MOVES)
+        raise ValueError
     ko_dmg = input_match_attr("% Damage? ", int)
     ko_side = input_match_attr("Off of which side of the screen? ")
+    if ko_side not in constants.DIRECTIONS:
+        print("direction must be one of the following:")
+        print(constants.DIRECTIONS)
+        raise ValueError
     # TODO: Pass in for_glory so that we can override the default in the
     #       conversion method
     ko_clock_time = input_match_attr("What was the clock time " +
@@ -177,11 +159,9 @@ def enter_ko():
 
 # Enter all kos for the match
 def enter_kos(for_glory=True):
-    # TODO: These should be config items, since we also use them in enter_stats
-    max_player_kos = 2
+    max_player_kos = config.FOR_GLORY_MAX_PLAYER_KOS
     if for_glory == False:
         max_player_kos = input_match_attr("How many stock? ", int)
-    max_match_kos = max_player_kos * 2 - 1
 
     # Player attributes
     kos1 = []
@@ -276,7 +256,7 @@ def enter_player(kos=[], falls=0, sds=0, winner = False, defaults=True):
     return player
 
 # Manually enter all match info via prompt
-def enter_match(date_time=None, for_glory=True, defaults=True):
+def enter_match(date=None, for_glory=True, defaults=True):
     print("Enter match information:")
 
     # Enter KOs
@@ -293,16 +273,15 @@ def enter_match(date_time=None, for_glory=True, defaults=True):
     else:
         winner1 = True
                       
-    # TODO: Parse all kinds of datetime strings, or come up with another way
-    #       to enter them (optional arg?), eg Feb 2, February 2nd, 2/2
-    #date = input("Date: (NOTE: This doesn't actually matter)")
-    if date_time == None:
-        # TODO: There's probably a cleaner way to do this...
-        date_time = datetime.datetime.today()
-        day = date_time.day
-        month = date_time.month
-        year = date_time.year
-        date_time = datetime.datetime(year, month, day)
+    if date == None:
+        # TODO: Convert all datetime objects into dates, since Smash replays
+        #       only record with day granularity
+        date = datetime.date.today()
+        # ^^^ Then you can delete the following 4 lines
+        day = date.day
+        month = date.month
+        year = date.year
+        date = datetime.datetime(year, month, day)
 
     # If we know the time of the last fall, we know how long the match lasted
     if last_fall_time != -1:
@@ -315,20 +294,15 @@ def enter_match(date_time=None, for_glory=True, defaults=True):
 
     # Enter Players
     print("PLAYER 1 (You):")
-    print("Who did you play as?")
     player1 = enter_player(kos1, falls1, sds1, winner1, defaults)
     print("PLAYER 2 (Opponent):")
     #print("Who did they play as?")
     player2 = enter_player(kos2, falls2, sds2, winner2, False)
 
-    match = Match(date_time, duration, stage, player1, player2)
+    match = Match(date, duration, stage, player1, player2)
     smash_conn.store_match(match.convert_to_dict())
     print(match.get_synopsis())
 
-def enter_test_match():
-    match = Match(dt, dur, lylat, player1, player2)
-    store_match(match.convert_to_dict())
-    print(match.get_synopsis())
 
 if __name__ == "__main__":
     #enter_match()
