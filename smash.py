@@ -216,33 +216,26 @@ def enter_stage(for_glory=True):
     return stage
 
 # Enter Smasher
-# TODO: Should this allow for entering a smasher with an id, too?
-def enter_smasher(defaults=True):
+def enter_smasher(for_glory=True, defaults=True):
     smasher_tag = "Lt Wheat"
     smasher_mii_name = "Mr. Wheat"
-    if not defaults == True:
-        smasher_tag = ""
+    if defaults != True:
         smasher_mii_name = input_match_attr("Mii Name: ")
-    smasher = Smasher(mii_name=smasher_mii_name, tag=smasher_tag)
+        smasher_tag = ""
+        smasher_id = -1
+        if for_glory != True:
+            attr = input("Enter Smasher by tag or ID (or both)? ")
+            if attr.lower() in ["tag", "both"]:
+                smasher_tag = input_match_attr("Smasher tag: ")
+            elif attr.lower() in ["id", "both"]:
+                smasher_id = input_match_attr("Smasher ID: ", int)
+    smasher = Smasher(smasher_mii_name, smasher_tag, smasher_id)
     return smasher
 
-# Enter Player stats
-def enter_player_stats(winner, kos, sds, for_glory=True):
-    stats = {}
-    max_player_kos = config.FOR_GLORY_MAX_KOS
-    if for_glory == False:
-        max_player_kos = input_match_attr("How many stock? ")
-    stats['falls'] = max_player_kos - sds
-    if winner == True:
-        stats['falls'] = input_match_attr("Falls: ", int)
-    stats['SDs'] = sds
-
-    return stats
-
 # Enter Player
-def enter_player(kos=[], falls=0, sds=0, winner = False, defaults=True):
+def enter_player(kos=[], falls=0, sds=0, winner = False, for_glory=True, defaults=True):
     # Enter Smasher
-    smasher = enter_smasher(defaults)
+    smasher = enter_smasher(for_glory, defaults)
 
     # Enter Fighter--only needs name, so no separate func
     fighter_name = input_match_attr("Character: ")
@@ -293,10 +286,10 @@ def enter_match(date=None, for_glory=True, defaults=True):
 
     # Enter Players
     print("PLAYER 1 (You):")
-    player1 = enter_player(kos1, falls1, sds1, winner1, defaults)
+    player1 = enter_player(kos1, falls1, sds1, winner1, for_glory, defaults)
     print("PLAYER 2 (Opponent):")
     #print("Who did they play as?")
-    player2 = enter_player(kos2, falls2, sds2, winner2, False)
+    player2 = enter_player(kos2, falls2, sds2, winner2, for_glory, defaults=False)
 
     match = Match(date, duration, stage, player1, player2)
     smash_conn.store_match(match.convert_to_dict())
