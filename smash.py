@@ -249,11 +249,6 @@ def enter_smasher(defaults=True):
 
 # Enter Player stats
 def enter_player_stats(winner, kos, sds, for_glory=True):
-    # TODO: Think about passing in both players' information--if we do, we can
-    #       fairly easily calculate the following:
-    #       falls
-    #       peak_damage
-    #       max_launch(er)_speed
     stats = {}
     max_player_kos = config.FOR_GLORY_MAX_KOS
     if for_glory == False:
@@ -262,43 +257,6 @@ def enter_player_stats(winner, kos, sds, for_glory=True):
     if winner == True:
         stats['falls'] = input_match_attr("Falls: ", int)
     stats['SDs'] = sds
-    #========= CAN'T PUT IN MATCH CUZ REPLAYS SUCK =======#
-    ## TODO: FOR GLORY: time_alive doesn't need to be entered--if it's for the
-    ##       winner, it's n/a or -1, and for the loser, it's the same as
-    ##       duration...so pass in duration
-    ##time_alive = -1
-    ##if not winner:
-    ##    if for_glory == True:
-    ##        #time_alive = duration
-    ##        pass
-    ##    #else:v1
-    ##    time_alive = input_match_attr("Time Alive: ", int)
-    ## TODO: Put in additional checks here, such as ground_time + air_time can't
-    ##       be more than time_alive, etc
-    ##stats['time_alive'] = time_alive
-    ##stats['damage_given'] = input_match_attr("Damage Given: ", int)
-    ##stats['damage_taken'] = input_match_attr("Damage Taken: ", int)
-    ##stats['damage_recovered'] = input_match_attr("Damage Recovered: ", int)
-    ##stats['peak_damage'] = input_match_attr("Peak Damage: ", int)
-    ##stats['launch_distance'] = input_match_attr("Launch Distance: ", int)
-    ##stats['ground_time'] = input_match_attr("Ground Time: ", int)
-    ##stats['air_time'] = input_match_attr("Air Time: ", int)
-    ##stats['hit_percentage'] = input_match_attr("Hit Percentage: ", int)
-    ##stats['ground_attacks'] = input_match_attr("Ground Attacks: ", int)
-    ##stats['air_attacks'] = input_match_attr("Air Attacks: ", int)
-    ##stats['smash_attacks'] = input_match_attr("Smash Attacks: ", int)
-    ##stats['grabs'] = input_match_attr("Grabs: ", int)
-    ##stats['throws'] = 0
-    ##if stats['grabs'] != 0:
-    ##    stats['throws'] = input_match_attr("Throws: ", int)
-    ##stats['edge_grabs'] = input_match_attr("Edge Grabs: ", int)
-    ##stats['projectiles'] = input_match_attr("Projectiles: ", int)
-    ##stats['items_grabbed'] = input_match_attr("Items Grabbed: ", int)
-    ##stats['max_launch_speed'] = input_match_attr("Max Launch Speed: ", int)
-    ##stats['max_launcher_speed'] = input_match_attr("Max Launcher Speed: ", int)
-    ##stats['longest_drought'] = input_match_attr("Longest Drought: ", int)
-    ##stats['transformation_time'] = input_match_attr("Transformation Time: ",int)
-    ## Matches with final smashes aren't worth recording
 
     return stats
 
