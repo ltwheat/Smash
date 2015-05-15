@@ -1,6 +1,5 @@
-# Pretty sure we don't actually need this, since it can be calculated from max player kos
-#DEFAULT_MAX_KOS = 3
 FOR_GLORY_MAX_PLAYER_KOS = 2
+FOR_GLORY_TIME_LIMIT = 300
 # TODO: Write method to turn a code into pretty names using these two dicts
 ATK_CODES_TO_NAMES = {"J": "Jab", "D": "Dash", "T": "Tilt", "S": "Smash",
                       "A": "Aerial", "B": "Special", "H": "Throw"}

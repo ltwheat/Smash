@@ -15,11 +15,7 @@ from conf import config
 from res import constants
 
 ##### TODOS #####
-# 1) A couple of the keys should always be 0 for FG--have the script error
-#    out if they aren't
-# 2) IDs? object_id (match_id, in this case) is stored in mongo automatically
-#    but do we need an external one? Should have one for players, at least.
-# 3) Long-term: Handle team matches
+# 1) Long-term: Handle team matches
 
 
 
@@ -116,14 +112,18 @@ def input_match_attr(prompt_string, attr_type=str):
         if val.lower() == "false":
             val = False
 
-    # TODO: try/except this part once you figure out how to switch control b/w
-    #       this func and enter_match(). For now, this throwing an error will
-    #       suffice.
-    val = attr_type(val)
+    try:
+        val = attr_type(val)
+    except ValueError:
+        print("Could not cast {0} as type {1}".format(val, attr_type))
     return val
 
 # Convert match clock time to elapsed time
-def convert_match_time_to_elapsed_time(match_clock, time_limit=300):
+def convert_match_time_to_elapsed_time(match_clock, for_glory=True):
+    time_limit = config.FOR_GLORY_TIME_LIMIT
+    if for_glory != True:
+        time_limit = input_match_attr("What was the match time limit (s)? ",
+                                      int)
     clock_units = match_clock.split(":")
     minutes = int(clock_units[0])
     seconds = int(clock_units[1])
@@ -131,7 +131,7 @@ def convert_match_time_to_elapsed_time(match_clock, time_limit=300):
     return time_elapsed
 
 # Enter a single KO
-def enter_ko():
+def enter_ko(for_glory=True):
     # The checks on moves and directions performed here are also performed in
     # the instantiation of the KO itself, however I've copied them here so
     # that the script will throw an error at the first sign of bad data
@@ -148,11 +148,10 @@ def enter_ko():
         print("direction must be one of the following:")
         print(constants.DIRECTIONS)
         raise ValueError
-    # TODO: Pass in for_glory so that we can override the default in the
-    #       conversion method
     ko_clock_time = input_match_attr("What was the clock time " +
                                      "(to the nearest second)? ")
-    ko_time = convert_match_time_to_elapsed_time(ko_clock_time)
+
+    ko_time = convert_match_time_to_elapsed_time(ko_clock_time, for_glory)
     ko = KO(ko_move, ko_dmg, ko_side, ko_time)
     return ko
     #print("KO: {0}".format(ko.convert_to_dict()))
@@ -193,7 +192,7 @@ def enter_kos(for_glory=True):
         # KO
         else:
             player_ko = input_match_attr("Which player scored the KO? ", int)
-            ko = enter_ko()
+            ko = enter_ko(for_glory)
             if player_ko == 1:
                 kos1.append(ko)
             # Assume the other player can have any port, not just 2.
