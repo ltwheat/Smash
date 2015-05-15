@@ -1,7 +1,7 @@
 #!/usr/bin/env
 
 from res import constants
-# TODO: Move to a config of some sort
+
 directions = constants.DIRECTIONS
 moves = constants.MOVES
 
