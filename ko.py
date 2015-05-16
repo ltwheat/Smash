@@ -1,11 +1,8 @@
 #!/usr/bin/env
 
 from res import constants
-# TODO: Move to a config of some sort
-# TODO: Add variants and a standardizer, so for instance, accept 'downb' as
-#       well as 'dspecial', but still store as 'dspecial'. Same thing with
-#       direction, e.g. 'top' -> 'up'
-directions = ['right', 'left', 'top', 'bottom']
+
+directions = constants.DIRECTIONS
 moves = constants.MOVES
 
 # Represents a KO on one player. For now, only applies to 1v1
@@ -14,11 +11,12 @@ moves = constants.MOVES
 # direction: which side of the screen the victim was knocked out of
 # time: number of seconds into the match the victim was KO'd
 class KO(object):
-    # TODO: What about a sweetspot boolean?
-    # TODO: What about charge attribute, for smashes or certain specials?
-    # TODO: What about rage (over 100%) attr?
-    # TODO: Shield break deaths (Jiggs, shield break on edge of stage -> fall)?
-    # TODO: Stage spike boolean?
+    ## TODO: Attributes to add in the future:
+    ##      -sweetspot boolean?
+    ##      -charge attribute, for smashes or certain specials?
+    ##      -rage (over 100%)?
+    ##      -Shield break deaths (Jiggs, shield break on edge of stage -> fall)?
+    ##      -Stage spike boolean?
     def __init__(self, move, damage, direction, time):
         # Instantiation checks
         if move not in moves:

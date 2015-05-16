@@ -60,3 +60,7 @@ MOVES = ["jab", "ftilt", "dash", "fsmash", "dtilt", "dsmash", "utilt",
          "usmash", "nspecial", "sspecial", "dspecial", "uspecial",
          "fthrow", "bthrow", "dthrow", "uthrow", "nair", "fair", "bair",
          "dair", "uair"]
+
+# TODO: Add variants and a standardizer, so for instance, accept 'up' as well
+#       as 'top', but still store 'top'
+DIRECTIONS = ['right', 'left', 'top', 'bottom']

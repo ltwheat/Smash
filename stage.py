@@ -8,16 +8,9 @@ stages = constants.STAGE_NAME_TO_ID
 
 class Stage(object):
     def __init__(self, name="", stage_id=-1, omega=False):
-        # THIS is an enormous pain in the ass--there does not seem to be one
-        # universal Python string manipulation method to account for all the
-        # variants of Smash 4's punctuation in stage names. .title() seems to
-        # be the best option, but will not work for Yoshi's Island, Luigi's
-        # Mansion (apostrophes), 75m or either PAC stage.
-        # TODO: Figure out a solution for the .title() exceptions
-        cap_name = name.title()
-        if 'yoshi' in name.lower() or 'pac' in name.lower() or \
-           'luigi' in name.lower() or '75' in name or ' of ' in name:
-            cap_name = name
+        # Correctly format the stage name
+        cap_name = self.stage_title(name)
+
         # Type/value checks
         if name == "" and stage_id == -1:
             raise ValueError("Stage must be instantiated with either name or id")
@@ -36,6 +29,32 @@ class Stage(object):
         self.name = cap_name
         self.stage_id = stage_id
         self.omega = omega
+
+    # Convert the input name to the correctly formatted stage name. There is
+    # no universal Python string manipulation method to account for all the
+    # variants of Smash 4's punctuation in stage names. .title() works for all
+    # stages except ones with apostrophes and either of the PAC stages.
+    def stage_title(self, name):
+        title = name.title()
+        # .title() will always capitalize the letter after an apostrophe, so
+        # undo that change
+        if "'" in title:
+            title = self.apostrophize_title(title)
+        # The PAC stages are in all caps
+        if "pac" in title.lower():
+            title = title.upper()
+        return title
+
+    # TODO: This needs to be in a utility file/method
+    # Correctly capitalize stage names with apostrophes
+    def apostrophize_title(self, title):
+        split_title = title.split("'")
+        new_title = split_title[0]
+        for segment in split_title[1:]:
+            # Stick the apostrophe back in, along with the lowercased
+            # subsequent letter and then the rest of the string
+            new_title += "'{0}{1}".format(segment[0].lower(), segment[1:])
+        return new_title
 
     # Adds the Omega to the name, if appropriate
     def get_name(self):

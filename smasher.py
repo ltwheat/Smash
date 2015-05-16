@@ -8,9 +8,22 @@ smashers = constants.SMASHER_NAME_TO_ID
 # TODO: Make update method
 class Smasher(object):
     def __init__(self, mii_name="", tag="", smasher_id=-1):
+
+        store = self.validate_instantiation(mii_name, tag, smasher_id)
+
+        # Set attributes
+        self.mii_name = mii_name
+        self.tag = tag
+        self.smasher_id = smasher_id
+
+        # Store the Smasher, if we've already determined it doesn't exist
+        # in the collection
+        if store:
+            smash_conn.store_smasher(self)
+
+    # Instantiation checks
+    def validate_instantiation(self, mii_name, tag, smasher_id):
         store = False
-        # TODO: This is too long, make it a separate method
-        # Instantiation checks
         if mii_name == "" and tag == "" and smasher_id == -1:
             raise ValueError("Smasher must be instantiated with Mii name, " +
                              "tag, or id")
@@ -24,19 +37,14 @@ class Smasher(object):
                                      " and no tag")
                 else:
                     # Smasher with this id exists, use it
-                    # TODO: Make this a separate method
                     smasher = smash_conn.get_smasher({'smasher_id':smasher_id})
-                    mii_name = smasher['mii_name']
-                    tag = smasher['tag']
-                    smasher_id = smasher['smasher_id']
+                    (mii_name, tag, smasher_id) = self.get_smasher_attrs(smasher)
             elif smasher_id == -1:
                 smasher_tags = self.get_all_smasher_tags()
                 if tag in smasher_tags:
                     # Smasher with this tag exists, use it
                     smasher = smash_conn.get_smasher({'tag':tag})
-                    mii_name = smasher['mii_name']
-                    tag = smasher['tag']
-                    smasher_id = smasher['smasher_id']
+                    (mii_name, tag, smasher_id) = self.get_smasher_attrs(smasher)
                 else:
                     # Just assign IDs consecutively for now. If there are no
                     # existing Smashers, this is the first one, so give it ID 1
@@ -55,9 +63,7 @@ class Smasher(object):
                                                               smasher['tag']))
                     else:
                         # Smasher with this tag and id exists, use it
-                        mii_name = smasher['mii_name']
-                        tag = smasher['tag']
-                        smasher_id = smasher['smasher_id']
+                        (mii_name, tag, smasher_id) = self.get_smasher_attrs(smasher)
                 else:
                     # No matching IDs, so this Smasher probably doesn't exist,
                     # but check for duplicate tags
@@ -66,16 +72,14 @@ class Smasher(object):
                     else:
                         raise ValueError("Smasher with tag {0} ".format(tag) +
                                          "already exists in the collection")
+        return store
 
-        # Set attributes
-        self.mii_name = mii_name
-        self.tag = tag
-        self.smasher_id = smasher_id
-
-        # Store the Smasher, if we've already determined it doesn't exist
-        # in the collection
-        if store:
-            smash_conn.store_smasher(self)
+    # Return the smasher_id, mii_name and tag of the given Smasher
+    def get_smasher_attrs(self, smasher):
+        mii_name = smasher['mii_name']
+        tag = smasher['tag']
+        smasher_id = smasher['smasher_id']
+        return (mii_name, tag, smasher_id)
 
     # Return name associated with smasher id
     def get_smasher_tag_for_id(self, smasher_id):

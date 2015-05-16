@@ -16,6 +16,7 @@ class Match(object):
         self.stage = stage
         self.player1 = player1
         self.player2 = player2
+        # TODO: Move match_id assignment over from smash_conn.store_match()
         self.match_id = -1
         self.time_limit = time_limit
 

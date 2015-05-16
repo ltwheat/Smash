@@ -12,42 +12,11 @@ from smasher import Smasher
 from stage import Stage
 
 from conf import config
+from res import constants
 
 ##### TODOS #####
-# 1) A couple of the keys should always be 0 for FG--have the script error
-#    out if they aren't
-# 2) IDs? object_id (match_id, in this case) is stored in mongo automatically
-#    but do we need an external one? Should have one for players, at least.
-# 3) Long-term: Handle team matches
+# 1) Long-term: Handle team matches
 
-
-##### NOTES #####
-# time_alive == 'out at'. Figured 'time_alive' was more clear
-# launch_distance: TODO: Is that me or him?
-# max_launch(er)_speed: which one is me, which one is him?
-# longest_drought: longest amount of time without throwing out an attack
-# transformation_time: total time spent in alternate state. Should always
-#                      be zero in FG
-
-### SAMPLE OBJECTS ###
-#dt = datetime.datetime.now()
-#dur = 60
-#lylat = Stage(name="Lylat Cruise")
-#smasher_lt = Smasher(tag="Lt Wheat")
-#luigi = Fighter(name="Luigi")
-#mario = Fighter(name="Mario")
-#kos1 = [KO("uspecial",101,"top",54), KO("fsmash",120,"right",146)]
-#kos2 = [KO("dsmash",143,"left",123)]
-#stats_lt={"falls": 1, "SDs": 0, "time_alive": -1, "damage_given": 286,
-#         "damage_taken": 190, "damage_recovered": 0, "peak_damage": 105,
-#         "launch_distance": 302, "ground_time": 115, "air_time": 71,
-#         "hit_percentage": 44, "ground_attacks": 59, "air_attacks": 20,
-#         "smash_attacks": 8, "grabs": 13, "throws": 4, "edge_grabs": 5,
-#         "projectiles": 25, "items_grabbed": 0, "max_launch_speed": 130,
-#         "max_launcher_speed": 145, "longest_drought": 9,
-#         "transformation_time": 0, "final_smashes": 0}
-#player1 = Player(smasher_lt, luigi, True, kos1, stats_lt)
-#player2 = Player(smasher_lt, mario, False, kos2, stats_lt)
 
 
 # Construct a Fighter from a dict
@@ -143,14 +112,18 @@ def input_match_attr(prompt_string, attr_type=str):
         if val.lower() == "false":
             val = False
 
-    # TODO: try/except this part once you figure out how to switch control b/w
-    #       this func and enter_match(). For now, this throwing an error will
-    #       suffice.
-    val = attr_type(val)
+    try:
+        val = attr_type(val)
+    except ValueError:
+        print("Could not cast {0} as type {1}".format(val, attr_type))
     return val
 
 # Convert match clock time to elapsed time
-def convert_match_time_to_elapsed_time(match_clock, time_limit=300):
+def convert_match_time_to_elapsed_time(match_clock, for_glory=True):
+    time_limit = config.FOR_GLORY_TIME_LIMIT
+    if for_glory != True:
+        time_limit = input_match_attr("What was the match time limit (s)? ",
+                                      int)
     clock_units = match_clock.split(":")
     minutes = int(clock_units[0])
     seconds = int(clock_units[1])
@@ -158,30 +131,36 @@ def convert_match_time_to_elapsed_time(match_clock, time_limit=300):
     return time_elapsed
 
 # Enter a single KO
-def enter_ko():
-    # TODO: Since the move instantiation doesn't happen til the end of this
-    #       method, the user can input a bad move and have to enter the rest of
-    #       the info til an error is thrown, which is annoying. Maybe check the
-    #       acceptable moves right after the move is entered?
+def enter_ko(for_glory=True):
+    # The checks on moves and directions performed here are also performed in
+    # the instantiation of the KO itself, however I've copied them here so
+    # that the script will throw an error at the first sign of bad data
+    # rather than making the user input all three KO attrs and then throwing
+    # an error. This won't be necessary with a UI.
     ko_move = input_match_attr("Move? ")
+    if ko_move not in constants.MOVES:
+        print("move must be one of the following:")
+        print(constants.MOVES)
+        raise ValueError
     ko_dmg = input_match_attr("% Damage? ", int)
     ko_side = input_match_attr("Off of which side of the screen? ")
-    # TODO: Pass in for_glory so that we can override the default in the
-    #       conversion method
+    if ko_side not in constants.DIRECTIONS:
+        print("direction must be one of the following:")
+        print(constants.DIRECTIONS)
+        raise ValueError
     ko_clock_time = input_match_attr("What was the clock time " +
                                      "(to the nearest second)? ")
-    ko_time = convert_match_time_to_elapsed_time(ko_clock_time)
+
+    ko_time = convert_match_time_to_elapsed_time(ko_clock_time, for_glory)
     ko = KO(ko_move, ko_dmg, ko_side, ko_time)
     return ko
     #print("KO: {0}".format(ko.convert_to_dict()))
 
 # Enter all kos for the match
 def enter_kos(for_glory=True):
-    # TODO: These should be config items, since we also use them in enter_stats
-    max_player_kos = 2
+    max_player_kos = config.FOR_GLORY_MAX_PLAYER_KOS
     if for_glory == False:
         max_player_kos = input_match_attr("How many stock? ", int)
-    max_match_kos = max_player_kos * 2 - 1
 
     # Player attributes
     kos1 = []
@@ -213,7 +192,7 @@ def enter_kos(for_glory=True):
         # KO
         else:
             player_ko = input_match_attr("Which player scored the KO? ", int)
-            ko = enter_ko()
+            ko = enter_ko(for_glory)
             if player_ko == 1:
                 kos1.append(ko)
             # Assume the other player can have any port, not just 2.
@@ -237,75 +216,26 @@ def enter_stage(for_glory=True):
     return stage
 
 # Enter Smasher
-# TODO: Should this allow for entering a smasher with an id, too?
-def enter_smasher(defaults=True):
+def enter_smasher(for_glory=True, defaults=True):
     smasher_tag = "Lt Wheat"
     smasher_mii_name = "Mr. Wheat"
-    if not defaults == True:
-        smasher_tag = ""
+    if defaults != True:
         smasher_mii_name = input_match_attr("Mii Name: ")
-    smasher = Smasher(mii_name=smasher_mii_name, tag=smasher_tag)
+        smasher_tag = ""
+        smasher_id = -1
+        if for_glory != True:
+            attr = input("Enter Smasher by tag or ID (or both)? ")
+            if attr.lower() in ["tag", "both"]:
+                smasher_tag = input_match_attr("Smasher tag: ")
+            elif attr.lower() in ["id", "both"]:
+                smasher_id = input_match_attr("Smasher ID: ", int)
+    smasher = Smasher(smasher_mii_name, smasher_tag, smasher_id)
     return smasher
 
-# Enter Player stats
-def enter_player_stats(winner, kos, sds, for_glory=True):
-    # TODO: Think about passing in both players' information--if we do, we can
-    #       fairly easily calculate the following:
-    #       falls
-    #       peak_damage
-    #       max_launch(er)_speed
-    stats = {}
-    max_player_kos = config.FOR_GLORY_MAX_KOS
-    if for_glory == False:
-        max_player_kos = input_match_attr("How many stock? ")
-    stats['falls'] = max_player_kos - sds
-    if winner == True:
-        stats['falls'] = input_match_attr("Falls: ", int)
-    stats['SDs'] = sds
-    #========= CAN'T PUT IN MATCH CUZ REPLAYS SUCK =======#
-    ## TODO: FOR GLORY: time_alive doesn't need to be entered--if it's for the
-    ##       winner, it's n/a or -1, and for the loser, it's the same as
-    ##       duration...so pass in duration
-    ##time_alive = -1
-    ##if not winner:
-    ##    if for_glory == True:
-    ##        #time_alive = duration
-    ##        pass
-    ##    #else:v1
-    ##    time_alive = input_match_attr("Time Alive: ", int)
-    ## TODO: Put in additional checks here, such as ground_time + air_time can't
-    ##       be more than time_alive, etc
-    ##stats['time_alive'] = time_alive
-    ##stats['damage_given'] = input_match_attr("Damage Given: ", int)
-    ##stats['damage_taken'] = input_match_attr("Damage Taken: ", int)
-    ##stats['damage_recovered'] = input_match_attr("Damage Recovered: ", int)
-    ##stats['peak_damage'] = input_match_attr("Peak Damage: ", int)
-    ##stats['launch_distance'] = input_match_attr("Launch Distance: ", int)
-    ##stats['ground_time'] = input_match_attr("Ground Time: ", int)
-    ##stats['air_time'] = input_match_attr("Air Time: ", int)
-    ##stats['hit_percentage'] = input_match_attr("Hit Percentage: ", int)
-    ##stats['ground_attacks'] = input_match_attr("Ground Attacks: ", int)
-    ##stats['air_attacks'] = input_match_attr("Air Attacks: ", int)
-    ##stats['smash_attacks'] = input_match_attr("Smash Attacks: ", int)
-    ##stats['grabs'] = input_match_attr("Grabs: ", int)
-    ##stats['throws'] = 0
-    ##if stats['grabs'] != 0:
-    ##    stats['throws'] = input_match_attr("Throws: ", int)
-    ##stats['edge_grabs'] = input_match_attr("Edge Grabs: ", int)
-    ##stats['projectiles'] = input_match_attr("Projectiles: ", int)
-    ##stats['items_grabbed'] = input_match_attr("Items Grabbed: ", int)
-    ##stats['max_launch_speed'] = input_match_attr("Max Launch Speed: ", int)
-    ##stats['max_launcher_speed'] = input_match_attr("Max Launcher Speed: ", int)
-    ##stats['longest_drought'] = input_match_attr("Longest Drought: ", int)
-    ##stats['transformation_time'] = input_match_attr("Transformation Time: ",int)
-    ## Matches with final smashes aren't worth recording
-
-    return stats
-
 # Enter Player
-def enter_player(kos=[], falls=0, sds=0, winner = False, defaults=True):
+def enter_player(kos=[], falls=0, sds=0, winner = False, for_glory=True, defaults=True):
     # Enter Smasher
-    smasher = enter_smasher(defaults)
+    smasher = enter_smasher(for_glory, defaults)
 
     # Enter Fighter--only needs name, so no separate func
     fighter_name = input_match_attr("Character: ")
@@ -318,7 +248,7 @@ def enter_player(kos=[], falls=0, sds=0, winner = False, defaults=True):
     return player
 
 # Manually enter all match info via prompt
-def enter_match(date_time=None, for_glory=True, defaults=True):
+def enter_match(date=None, for_glory=True, defaults=True):
     print("Enter match information:")
 
     # Enter KOs
@@ -335,16 +265,15 @@ def enter_match(date_time=None, for_glory=True, defaults=True):
     else:
         winner1 = True
                       
-    # TODO: Parse all kinds of datetime strings, or come up with another way
-    #       to enter them (optional arg?), eg Feb 2, February 2nd, 2/2
-    #date = input("Date: (NOTE: This doesn't actually matter)")
-    if date_time == None:
-        # TODO: There's probably a cleaner way to do this...
-        date_time = datetime.datetime.today()
-        day = date_time.day
-        month = date_time.month
-        year = date_time.year
-        date_time = datetime.datetime(year, month, day)
+    if date == None:
+        # TODO: Convert all datetime objects into dates, since Smash replays
+        #       only record with day granularity
+        date = datetime.date.today()
+        # ^^^ Then you can delete the following 4 lines
+        day = date.day
+        month = date.month
+        year = date.year
+        date = datetime.datetime(year, month, day)
 
     # If we know the time of the last fall, we know how long the match lasted
     if last_fall_time != -1:
@@ -357,20 +286,15 @@ def enter_match(date_time=None, for_glory=True, defaults=True):
 
     # Enter Players
     print("PLAYER 1 (You):")
-    print("Who did you play as?")
-    player1 = enter_player(kos1, falls1, sds1, winner1, defaults)
+    player1 = enter_player(kos1, falls1, sds1, winner1, for_glory, defaults)
     print("PLAYER 2 (Opponent):")
     #print("Who did they play as?")
-    player2 = enter_player(kos2, falls2, sds2, winner2, False)
+    player2 = enter_player(kos2, falls2, sds2, winner2, for_glory, defaults=False)
 
-    match = Match(date_time, duration, stage, player1, player2)
+    match = Match(date, duration, stage, player1, player2)
     smash_conn.store_match(match.convert_to_dict())
     print(match.get_synopsis())
 
-def enter_test_match():
-    match = Match(dt, dur, lylat, player1, player2)
-    store_match(match.convert_to_dict())
-    print(match.get_synopsis())
 
 if __name__ == "__main__":
     #enter_match()
