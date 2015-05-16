@@ -123,3 +123,13 @@ class Smasher(object):
     # Get all Smasher ids
     def get_all_smasher_ids(self):
         return self.get_all_smasher_attr('smasher_id')
+
+    def get_matches_won(self, match_type="for_glory"):
+        matches = smash_conn.get_matches_by_smasher(self, match_type)
+        matches_won = []
+        for match in matches:
+            for player_str in ['player1', 'player2']:
+                if match[player_str]['smasher'] == self.convert_to_dict() and \
+                        match[player_str]['winner'] == True:
+                    matches_won.append(match)
+        return matches_won
